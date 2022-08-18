@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+   <meta charset="UTF-8" />
+   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <link rel="stylesheet" href="{% static 'css/about.css' %}" />
+
+
+<p style="text-align:center;">
+<img = src = "{% static 'media/logo.svg'%}" alt="Logo" style="width: 100px; height: 100px;" >
+
+</p>
+
+ </head>
+ <body>
+   <nav class="navbar">
+
+     <!-- NAVIGATION MENU -->
+     <ul class="nav-links">
+
+
+       <!-- NAVIGATION MENUS -->
+       <div class="menu">
+         <li><a href="{% url 'home' %}" >Home</a></li>
+				  <li><a href="{% url 'research' %}">Research Publication</a></li>
+					 <li><a href="{% url 'people' %}">People</a></li>
+         <li><a href="{% url 'about' %}">About</a></li>
+         <li><a href="{% url 'contact' %}">Contact</a></li>
+
+
+       </div>
+     </ul>
+
+     <li><a onclick="document.getElementById('id01').style.display='block'"
+      style="width:auto;" style="float: right" >Login</a></li>
+    </nav>
+    <div id="id01" class="modal">
+
+      <form class="modal-content animate" action="/action_page.php" method="post">
+        <div class="imgcontainer">
+          <span onclick="document.getElementById('id01').style.display='none'" class="close"
+           title="Close Modal">&times;</span>
+           <img = src = "{% static 'media/cslogo.png'%}" alt="Avatar" style="width: 100px; height: 100px;">
+         
+        </div>
+
+        <div class="container">
+          <label for="uname"><b>Username</b></label>
+          <input type="text" placeholder="Enter Username" name="uname" required>
+
+          <label for="psw"><b>Password</b></label>
+          <input type="password" placeholder="Enter Password" name="psw" required>
+
+          <button type="submit" >Login</button>
+          <label>
+            <input type="checkbox" checked="checked" name="remember"> Remember me
+          </label>
+        </div>
+
+        <div class="container" style="background-color: white">
+          <a type="button" onclick="document.getElementById('id01').style.display='none'"
+          class="cancelbtn">Cancel</a>
+          <span class="psw">Forgot <a href="#">password?</a></span>
+        </div>
+      </form>
+    </div>
+
+    <script>
+    // Get the modal
+    var modal = document.getElementById('id01');
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+    </script>
+
+
+
+           </div>
+
+  </head>
+  <body>
+
+  <div class="about-section">
+
+
+    <h1 style="text-align:center">Structure and History</h1>
+
+    <p>The Department of Science and Innovation provides the majority of funding for the Centre for Artificial Intelligence Research (CAIR), a dispersed South African research network with nine established and two emergent research groups spread across eight institutions (DSI). Virtually, the Council for Scientific and Industrial Research serves as its host and coordinator (CSIR). The Department of Science and Innovation provides the majority of funding for the Centre for Artificial Intelligence Research (CAIR), a dispersed South African research network with nine established and two emergent research groups spread across eight institutions (DSI). Virtually, the Council for Scientific and Industrial Research serves as its host and coordinator (CSIR).</p>
+
+    <p>Resize the browser window to see that this page is responsive by the way.</p>
+  </div>
+  <p> </p>
+
+    </div>
+  </div>
+
+</body>
+</html>
