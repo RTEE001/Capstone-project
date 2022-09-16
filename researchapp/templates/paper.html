@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<head>
+    <title> Papers </title>
+</head>
+
+<body>
+    <center>
+        <h1> Filter papers <h1>
+        <hr>
+        <form method = 'POST'>
+           {% csrf_token %}
+        Start Date:<input type = 'date' name = 'startdate'/>
+        End Date:<input type = 'date' name = 'enddate'/>
+        <input type = 'submit' name = 'Search'/>
+        </hr>
+        <table border = '1'>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Co_author</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Date Published</th>
+            </tr>
+            {% for paper in papers%}
+            <tr> 
+                <td>{{paper.title}}</td>
+                <td>{{paper.author}}</td>
+                <td>{{paper.co_author}}</td>
+                <td>{{paper.description}}</td>
+                <td>{{paper.category}}</td>
+                <td>{{paper.created}}</td>
+
+            </tr>
+            {% endfor%}
+        </table>
+    </center>
+</body>
+<html>
