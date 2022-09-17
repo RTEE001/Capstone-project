@@ -1,3 +1,5 @@
+{%load static%}
+
 <!DOCTYPE html>
 <head>
     <title> Papers </title>
@@ -11,7 +13,11 @@
            {% csrf_token %}
         Start Date:<input type = 'date' name = 'startdate'/>
         End Date:<input type = 'date' name = 'enddate'/>
+    
         <input type = 'submit' name = 'Search'/>
+        <h1> reports <h1>
+            <hr>
+           <a href = "{% url 'paperpdf' %}" > Generate report </a>
         </hr>
         <table border = '1'>
             <tr>
@@ -19,7 +25,7 @@
                 <th>Author</th>
                 <th>Co_author</th>
                 <th>Description</th>
-        
+                <th>View</th>
                
             </tr>
             {% for paper in papers%}
@@ -28,8 +34,8 @@
                 <td>{{paper.author}}</td>
                 <td>{{paper.co_author}}</td>
                 <td>{{paper.description}}</td>
+                <td><a href = '{{ paper.pdf.url }}'> download </a></td>
              
-
             </tr>
             {% endfor%}
         </table>

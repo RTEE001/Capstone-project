@@ -12,6 +12,7 @@ urlpatterns = [
 
 
     path('papers/', views.show_paper_results, name = 'papers'),
+    path('papers_pdf/', views.generate_pdf, name = 'paperpdf'),
 
 #admin
     path('aluser/', views.ListUserView.as_view(), name='aluser'),

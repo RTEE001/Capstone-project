@@ -7,6 +7,11 @@ from django.views import generic
 from django.views.generic import  DetailView, UpdateView
 from .forms import UserForm
 from django.contrib.auth import authenticate, logout
+import io
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.lib.pagesizes import letter
 # Create your views here.
 '''
 Collect items from database and pass them to a template
@@ -115,11 +120,22 @@ def show_paper_results(request):
         display_paper = Paper.objects.all()
         return render(request, 'paper.html', {'papers':display_paper})
 
-def filter_by_category(request):
-    if request.method == 'POST':
-        paper_category = request.POST.get('paper_category')
-        category_result = Paper.objects.filter(category = paper_category)
-        return render(request, 'paper.html', {'categories': category_result})
-    else:
-        display_paper = Paper.objects.all()
-        return render(request, 'paper.html', {'papers':display_paper})
+def generate_pdf(request):
+    buffer = io.BytesIO()
+
+    pdf_object = canvas.Canvas(buffer, pagesize = letter, bottomup = 0)
+    text_object =  pdf_object.beginText()
+    text_object.setTextOrigin(inch, inch)
+    text_object.setFont('Helvetica', 14)
+
+    papers = Paper.objects.all()
+    num_papers = papers.count()
+    lines = []
+    lines.append(f'Total number of papers: {num_papers}')
+    for line in lines:
+        text_object.textLine(line)
+    pdf_object.drawText(text_object)
+    pdf_object.showPage()
+    pdf_object.save()
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, filename = 'papers_report.pdf')
