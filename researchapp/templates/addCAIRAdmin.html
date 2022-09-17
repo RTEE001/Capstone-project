@@ -1,0 +1,41 @@
+{% extends 'dashboard.html' %}
+
+{% load static %}
+
+{% block body%}
+ <form action="{% url 'createCAUser' %}" method = "POST">
+ {% csrf_token %}
+  <div class="container">
+    <h1>Register</h1>
+    <p>Please fill in this form to create an account.</p>
+    <hr>
+    <label for="username"><b>Username</b></label>
+    <input type="text" placeholder="Enter Username name="name="username" id="username" required>
+    
+    <label for="First"><b>First name</b></label>
+    <input type="text" placeholder="Enter First name" name="First" id="First" required>
+ 
+    <label for="Last"><b>Last name</b></label>
+    <input type="text" placeholder="Enter Last" name="Last" id="Last" required>
+    
+    <label for="email"><b>Email</b></label>
+    <input type="text" placeholder="Enter Email" name="email" id="email" required>
+
+    <label for="psw"><b>Password</b></label>
+    <input type="password" placeholder="Enter Password" name="psw" id="psw" required>
+
+    <label for="psw-repeat"><b>Repeat Password</b></label>
+    <input type="password" placeholder="Repeat Password" name="psw-repeat" id="psw-repeat" required>
+    <hr>
+    
+    
+    
+    
+    <button type="submit" class="registerbtn">Register</button>
+  </div>
+
+  <div class="container signin">
+    
+  </div>
+</form> 
+{% endblock %}
