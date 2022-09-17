@@ -1,30 +1,12 @@
-from email import message
-from urllib.parse import uses_fragment
 from django.shortcuts import render, redirect
-from .models import Paper, Login, User
+from .models import Paper, User
 from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-
-from django.shortcuts import redirect, render
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from django.views import generic
-
-from .models import User
-from django.contrib import messages
-from django.db.models import Sum
-from django.views.generic import CreateView, DetailView, DeleteView, UpdateView, ListView
+from django.views.generic import  DetailView, UpdateView
 from .forms import UserForm
-from . import models
-import operator
-import itertools
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth import authenticate, logout
-from django.contrib import auth, messages
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
 # Create your views here.
 '''
 Collect items from database and pass them to a template
@@ -129,6 +111,15 @@ def show_paper_results(request):
         enddate = request.POST.get('enddate')
         search_result = Paper.objects.filter(created__range = [startdate, enddate])
         return render(request, 'paper.html', {'papers': search_result})
+    else:
+        display_paper = Paper.objects.all()
+        return render(request, 'paper.html', {'papers':display_paper})
+
+def filter_by_category(request):
+    if request.method == 'POST':
+        paper_category = request.POST.get('paper_category')
+        category_result = Paper.objects.filter(category = paper_category)
+        return render(request, 'paper.html', {'categories': category_result})
     else:
         display_paper = Paper.objects.all()
         return render(request, 'paper.html', {'papers':display_paper})
