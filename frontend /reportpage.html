@@ -43,6 +43,13 @@
             <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png">
 
 
+            	<link href="assets/css/bootstrap.css" rel="stylesheet" type="text/css">
+            	<link href="assets/css/bootstrap-override.css" rel="stylesheet" type="text/css">
+            	<link href="assets/css/bootstrap-table.css" rel="stylesheet" type="text/css">
+            	<link href="bootstrap-table-filter.css" rel="stylesheet" type="text/css">
+            	<link href="assets/css/select2.css" rel="stylesheet" type="text/css">
+            	<link href="assets/css/jquery-ui-1.10.3.css" rel="stylesheet" type="text/css">
+            	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
 
 
 <style>
@@ -305,7 +312,55 @@
                <script src="assets/js/jquery.mCustomScrollbar.concat.min.js"></script>
                <script src="assets/js/scripts.js"></script>
 
-           </body>
+
+               <div class="container">
+
+             		<div class="alert alert-warning">
+             			<strong>Remember!</strong>
+             		</div>
+
+             		<table id="itemsTable2" class="table"
+             			data-toggle="table"
+             			data-url="data.json"
+             			data-height="420"
+             			data-filter="true"
+             			data-icons-prefix="fa"
+             			data-pagination="true"
+             		    data-side-pagination="server"
+             		    data-page-number="1"
+             		    data-page-size="15">
+             			<thead>
+             				<tr>
+             					<th data-field="id" data-align="center" data-sortable="true">Report ID</th>
+                                 <th data-field="name" data-align="center" data-sortable="true"
+             										data-filter-type="input">Reserch Groups</th>
+                                 <th data-field="price" data-align="" data-sortable="true" data-filter-type="select"
+             										 data-filter-data="var:University">University Name</th>
+                                 <th data-field="date" data-align="" data-class="col-sm-3"
+             										data-sortable="true" data-filter-type="datepicker_range">Report Date</th>
+             				</tr>
+             			</thead>
+             		</table>
+
+
+             	</div>
+
+             	<script src="assets/js/jquery-1.11.3.js"></script>
+             	<script src="assets/js/bootstrap.js"></script>
+             	<script src="assets/js/bootstrap-table.js"></script>
+             	<script src="assets/js/bootstrap-table-en-US.js"></script>
+             	<script src="assets/js/select2.js"></script>
+             	<script src="assets/js/jquery-ui-1.10.3.min.js"></script>
+             	<script src="bootstrap-table-filter.js"></script>
+             	<script type="text/javascript">
+
+                     var University = [{ id: 1, text: 'University of Cape Town' }, { id: 2, text: 'University of Pretoria' },
+             				{ id: 3, text: 'University of Western Cape' }];
+
+             		$('#itemsTable').on('column-search.bs.table', function () {
+             				console.log('hello event');
+                     });
+             	</script>
 
 
 
