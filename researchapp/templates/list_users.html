@@ -40,6 +40,10 @@
                             {{ message }}
                         </div>
                     {% endfor %}
+                     <form method="GET" action="{% url 'manageusersearch' %}">
+                     <input class="form-control py-2 border-right-0 border" type="search" name="query" placeholder="Title contains..." />
+                     <button type="submit" class="btn btn-primary">Search</button>
+                     </form>
                     <div class="table-responsive">
                         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                             <thead>

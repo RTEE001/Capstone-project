@@ -1,10 +1,12 @@
+from contextlib import nullcontext
 from email import message
 import re
+from unicodedata import unidata_version
 from urllib import request
 from urllib.parse import uses_fragment
 from wsgiref.util import request_uri
 from django.shortcuts import render, redirect
-from .models import Paper, Login, Role, User, Groups, University
+from .models import Paper, Role, User, Groups, University
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils.text import slugify
@@ -12,6 +14,10 @@ from django.shortcuts import redirect, render
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from django.views import generic
+from django.db.models import Q  
+import re
+
+
 
 from .models import User
 from django.contrib import messages
@@ -161,6 +167,7 @@ def filterUsersbyrole(request):
         qs = qs.filter(grp__Gname__icontains=request.user.grp)
         qs = qs.filter(role__RoleType__icontains='student')
     
+        
     print(grps)
     context = {
         'users': qs,
@@ -170,6 +177,19 @@ def filterUsersbyrole(request):
     }
     return context
 
+
+def getFilteredUsers(request):
+    qs = User.objects.all()
+    grps = Groups.objects.all()
+    if getRole(request)=='GroupAdmin':
+        qs = qs.filter(grp__Gname__icontains=request.user.grp)
+    elif getRole(request)=="UniAdmin":
+        qs = qs.filter(uni__Uniname__icontains=request.user.uni)
+        grps = grps.filter(uni__Uniname__icontains=request.user.uni)
+    elif getRole(request)=="Researcher":
+        qs = qs.filter(grp__Gname__icontains=request.user.grp)
+        qs = qs.filter(role__RoleType__icontains='student')
+    return qs
 
 def dashboardManageUsers(request):
     if getRole(request)=='student':
@@ -300,3 +320,163 @@ def create_Researcher(request):
                 a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), uni=University.objects.get(Uniname__exact=request.POST['UniCat']), grp=Groups.objects.get(Gname__exact=request.POST['GroupCat']))
                 a.save()
     return redirect('listusers')
+
+
+
+def addUnidetails(request):
+    if request.method == 'POST':
+        form = (request.POST, request.FILES)
+        Uname=request.POST['Acronym']
+        
+        instance = University(Uniname=Uname, image=request.FILES['logo'])
+        instance.save()
+        return redirect('dashboard')
+
+    return redirect('addUni')
+
+def addUni(request):
+    return render(request, 'addUni.html', filterUsersbyrole(request))
+
+def normalize_query(query_string,findterms=re.compile(r'"([^"]+)"|(\S+)').findall,normspace=re.compile(r'\s{2,}').sub):
+
+    return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)]
+
+def get_query(query_string, search_fields):
+    ''' Returns a query, that is a combination of Q objects. That combination
+        aims to search keywords within a model by testing the given search fields.
+
+    '''
+    query = None # Query to search for every search term
+    terms = normalize_query(query_string)
+    for term in terms:
+        or_query = None # Query to search for a given term in each field
+        for field_name in search_fields:
+            q = Q(**{"%s__icontains" % field_name: term})
+            if or_query is None:
+                or_query = q
+            else:
+                or_query = or_query | q
+        if query is None:
+            query = or_query
+        else:
+            query = query & or_query
+    return query
+
+def manageUserFilter(request):
+    
+    query_string = ''
+    found_entries = None
+    if getRole(request)=="UniAdmin":
+        
+        grps = Groups.objects.all().filter(uni__Uniname__icontains=request.user.uni)
+                
+    if getRole(request)=="CAIRAdmin":
+        grps = Groups.objects.all()
+    
+    if ('query' in request.GET) and request.GET['query'].strip():
+        query_string = request.GET['query']
+
+        entry_query = get_query(query_string, ['first_name', 'last_name'])
+
+        user_list= getFilteredUsers(request).filter(entry_query)
+        context = {
+                
+                'Role': getRole(request),
+                'users': user_list,
+                'UniCategory': University.objects.all()
+                
+                }
+        
+        return render(request,'list_users.html',context)
+    else:
+        user_list = getFilteredUsers(request)
+        context = {
+                
+                'Role': getRole(request),
+                'users': user_list,
+                'UniCategory': University.objects.all()
+                }
+        
+    if request.GET['UniCat']=="":
+        user_list=user_list.filter(uni__Uniname__icontains=request.user.uni)
+    if request.GET['GroupCat']=="":
+        user_list.filter(grp__Gname__icontains=request.user.grp)
+    if request.GET['RoleCat']=="":
+    return render(request, 'list_users.html',context)
+
+
+# def manageUserFilter(request):
+   
+#     query = request.GET['query']
+    
+
+
+#     #data = query.split()
+#     data = query
+#     print(len(data))
+#     if( len(data) == 0):
+#         return redirect('listusers')
+#     else:
+#                 qs=nullcontext
+#                 name= data.split(" ")
+#                 i=0
+#                 j=1
+#                 if name[0] =="Mr":
+#                     return qs
+#                 if len(name)==1:
+                    
+#                 # Searching for It
+#                     qs5 =getFilteredUsers(request).filter(first_name__iexact=name[i]).distinct()
+#                     qs6 =getFilteredUsers(request).filter(first_name__exact=name[i]).distinct()
+
+#                     qs7 =getFilteredUsers(request).filter(first_name__contains=name[i])
+#                     qs8 =getFilteredUsers(request).select_related().filter(first_name__contains=name[i]).distinct()
+#                     qs9 =getFilteredUsers(request).filter(first_name__startswith=name[i]).distinct()
+#                     qs10 =getFilteredUsers(request).filter(first_name__endswith=name[i]).distinct()
+#                     qs11 =getFilteredUsers(request).filter(first_name__istartswith=name[i]).distinct()
+#                     qs12 =getFilteredUsers(request).filter(first_name__icontains=name[i])
+#                     qs13 =getFilteredUsers(request).filter(first_name__iendswith=name[i]).distinct()
+
+#                     qs14 =getFilteredUsers(request).filter(last_name__iexact=name[i]).distinct()
+#                     qs15 =getFilteredUsers(request).filter(last_name__exact=name[i]).distinct()
+
+#                     qs16 =getFilteredUsers(request).all().filter(last_name__contains=name[i])
+#                     qs17 =getFilteredUsers(request).select_related().filter(last_name__contains=name[i]).distinct()
+#                     qs18 =getFilteredUsers(request).filter(last_name__startswith=name[i]).distinct()
+#                     qs19 =getFilteredUsers(request).filter(last_name__endswith=name[i]).distinct()
+#                     qs20 =getFilteredUsers(request).filter(last_name__istartswith=name[i]).distinct()
+#                     qs21 =getFilteredUsers(request).filter(last_name__icontains=name[i])
+#                     qs22 =getFilteredUsers(request).filter(last_name__iendswith=name[i]).distinct()
+
+#                     files = itertools.chain(qs5, qs6, qs7, qs8, qs9, qs10, qs11, qs12, qs13, qs14, qs15, qs16, qs17, qs18, qs19, qs20, qs21, qs22)
+#                 else:
+                    
+#                     qs5 =getFilteredUsers(request).filter(first_name__iexact=name[i],last_name__iexact=name[j]).distinct()
+#                     qs6 =getFilteredUsers(request).filter(first_name__exact=name[i],last_name__iexact=name[j]).distinct()
+
+#                     files = itertools.chain(qs5, qs6)
+
+#                 res = []
+#                 for i in files:
+#                     if i not in res:
+#                         res.append(i)
+#                 if getRole(request)=="UniAdmin":
+        
+#                     grps = Groups.objects.all().filter(uni__Uniname__icontains=request.user.uni)
+                
+#                 if getRole(request)=="CAIRAdmin":
+#                     grps = Groups.objects.all()
+#                 grps = nullcontext
+#                 print(files)
+#                 # word variable will be shown in html when user click on search button
+#                 context = {
+#                 
+#                 'Role': getRole(request),
+#                 'groups': grps,
+#                 'UniCategory': University.objects.all()
+#                 }
+                
+#                 return render(request, 'list_users.html',context)
+
+
+

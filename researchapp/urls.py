@@ -34,5 +34,8 @@ urlpatterns = [
     path('createCAUser/', views.create_CAIRAdmin, name= 'createCAUser'),
     path('createRUser/', views.create_Researcher, name= 'createRUser'),
    
+path('manageusersearch/',views.manageUserFilter, name ='manageusersearch'), 
+   path('addUni/', views.addUni, name= 'addUni'),
+   path('addUnidetails,', views.addUnidetails, name= 'addUnidetails')
 
 ]

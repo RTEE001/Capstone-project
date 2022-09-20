@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from researchapp.models import Groups
+from researchapp.models import Groups, University
 
 from django.forms import ModelForm
 
@@ -17,4 +17,9 @@ class GroupForm(forms.ModelForm):
     class Meta:
         model = Groups
         fields = ('Gname',)
+
+    
+
+
+
     
