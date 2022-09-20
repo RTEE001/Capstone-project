@@ -61,7 +61,7 @@ class Groups(models.Model):
     group_name = models.CharField(max_length=100)
     university = models.ForeignKey(University, on_delete=models.CASCADE, default=None, null=TRUE)
     def __str__(self):
-        return self.Gname
+        return self.group_name
 
 class User(AbstractUser):
     

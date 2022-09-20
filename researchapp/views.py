@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Paper, User
+from .models import *
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
@@ -12,6 +12,8 @@ from django.http import FileResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
+import re
+from django.db.models import Q
 # Create your views here.
 '''
 Collect items from database and pass them to a template
@@ -110,8 +112,8 @@ def index(request):
 def h(request):
     return render(request,'h.html')
 
-def show_paper_results(request):
-    if request.method == 'POST':
+def show_paper_results_by_date(request):
+    if request.method == 'POST':     
         startdate = request.POST.get('startdate')
         enddate = request.POST.get('enddate')
         search_result = Paper.objects.filter(created__range = [startdate, enddate])
@@ -120,6 +122,9 @@ def show_paper_results(request):
         display_paper = Paper.objects.all()
         return render(request, 'paper.html', {'papers':display_paper})
 
+#
+
+##needs work
 def generate_pdf(request):
     buffer = io.BytesIO()
 
@@ -130,12 +135,109 @@ def generate_pdf(request):
 
     papers = Paper.objects.all()
     num_papers = papers.count()
+
+    users = User.objects.all()
+    num_users = users.count()
+
+    unis = University.objects.all()
+    num_unis = unis.count()
+
+    uni_counts = {}
+
+    for user in users:
+        if user.uni not in uni_counts:
+            uni_counts[user.uni] = {
+            'uni': user.uni.__str__(),
+            'count': 0
+            }
+
+        uni_counts[user.uni]['count'] += 1
+        
+
+    groups = Groups.objects.all()
+    num_groups = groups.count()
+    
+    group_counts = {}
+
+    for user in users:
+        if user.grp not in group_counts:
+            group_counts[user.grp] = {
+            'group': user.grp.__str__(),
+            'count': 0
+            }
+
+        group_counts[user.grp]['count'] += 1
+
     lines = []
     lines.append(f'Total number of papers: {num_papers}')
+    lines.append(f'Total number of users: {num_users}')
+    lines.append(f'Total number of groups: {num_groups}')
+    for i in group_counts:
+        lines.append(str(group_counts[i]))
+
+    for i in uni_counts:
+        lines.append(str(uni_counts[i]))
+
+    lines.append(f'Total number of universities: {num_unis}')
     for line in lines:
         text_object.textLine(line)
+        text_object.textLine(print())
     pdf_object.drawText(text_object)
     pdf_object.showPage()
     pdf_object.save()
     buffer.seek(0)
     return FileResponse(buffer, as_attachment=True, filename = 'papers_report.pdf')
+
+
+
+# searching 
+def normalize_query(query_string,
+                    findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
+                    normspace=re.compile(r'\s{2,}').sub):
+    ''' Splits the query string in invidual keywords, getting rid of unecessary spaces
+        and grouping quoted words together.
+        Example:
+
+        >>> normalize_query('  some random  words "with   quotes  " and   spaces')
+        ['some', 'random', 'words', 'with quotes', 'and', 'spaces']
+
+    '''
+    return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)]
+
+def get_query(query_string, search_fields):
+    ''' Returns a query, that is a combination of Q objects. That combination
+        aims to search keywords within a model by testing the given search fields.
+
+    '''
+    query = None # Query to search for every search term
+    terms = normalize_query(query_string)
+    for term in terms:
+        or_query = None # Query to search for a given term in each field
+        for field_name in search_fields:
+            q = Q(**{"%s__icontains" % field_name: term})
+            if or_query is None:
+                or_query = q
+            else:
+                or_query = or_query | q
+        if query is None:
+            query = or_query
+        else:
+            query = query & or_query
+    return query
+
+def search_paper(request):
+    
+    query_string = ''
+    found_entries = None
+    if ('q' in request.GET) and request.GET['q'].strip():
+        query_string = request.GET['q']
+
+        entry_query = get_query(query_string, ['title', 'description','author'])
+
+        paper_list= Paper.objects.filter(entry_query)
+        return render(request,'paper.html',{'papers':paper_list} )
+    else:
+        display_paper = Paper.objects.all()
+        return render(request, 'paper.html', {'papers':display_paper})
+
+# def paper_filters(request):

@@ -8,12 +8,30 @@
 <body>
     <center>
         <h1> Filter papers <h1>
+            
+
         <hr>
-        <form method = 'POST'>
-           {% csrf_token %}
-        Start Date:<input type = 'date' name = 'startdate'/>
-        End Date:<input type = 'date' name = 'enddate'/>
+    <form method = 'GET'>
+           {% csrf_token %} 
+           Search publications:<input type = 'text' name = 'q'/>
+
+        {% comment %} Start Date:<input type = 'date' name = 'startdate' />
+        End Date:<input type = 'date' name = 'enddate' />
+
+        Univertity: <input type = 'text' name = 'university'/>
+        Research group: <input type = 'text' name = 'researchgroup'/>
+        Type of publication: <input type = 'text' name = 'papertype'/> {% endcomment %}
     
+{% comment %}     
+        <form method = 'POST'>
+            {% csrf_token %}
+         Start Date:<input type = 'date' name = 'startdate'/>
+         End Date:<input type = 'date' name = 'enddate'/>
+ 
+         Univertity: <input type = 'text' name = 'university'/>
+         Research group: <input type = 'text' name = 'researchgroup'/>
+         Type of publication: <input type = 'text' name = 'papertype'/> 
+         search : <input type = 'text' name = 'papers'> {% endcomment %}
         <input type = 'submit' name = 'Search'/>
         <h1> reports <h1>
             <hr>
