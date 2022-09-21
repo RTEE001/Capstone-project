@@ -82,7 +82,10 @@ def homelogged(request):
     return render(request,'people.html')
 
 def researchgroup(request):
-    return render(request,'researchgroup.html')
+    context={
+        'groups': Groups.objects.all()
+    }
+    return render(request,'researchgroup.html', context)
 
 def about(request):
     return render(request,'about.html')
@@ -92,7 +95,11 @@ def contact(request):
 
 
 def people(request):
-    return render(request,'people.html')
+    context ={
+            'users': User.objects.all(),
+
+    }
+    return render(request,'people.html', context)
 
 def research(request):
     if login1(request):
@@ -172,6 +179,7 @@ def filterUsersbyrole(request):
     context = {
         'users': qs,
         'groups': grps,
+        'Roles' : Role.objects.all(),
         'Role': getRole(request),
         'UniCategory': University.objects.all()
     }
@@ -362,9 +370,62 @@ def get_query(query_string, search_fields):
             query = query & or_query
     return query
 
+def filter_by_nameDash(request):
+    query_string = ''
+    if ('query' in request.GET) and request.GET['query']!="":
+        query_string = request.GET['query']
+
+        entry_query = get_query(query_string, ['first_name', 'last_name'])
+
+        return getFilteredUsers(request).filter(entry_query)
+       
+    else:
+        return getFilteredUsers(request)
+
+def filter_by_nameAll(request):
+    query_string = ''
+    if ('query' in request.GET) and request.GET['query']!="":
+        query_string = request.GET['query']
+
+        entry_query = get_query(query_string, ['first_name', 'last_name', 'uni__Uniname'])
+
+        return User.objects.all().filter(entry_query)
+       
+    else:
+        return User.objects.all()
+    
+
+def filter_group_by_nameAll(request):
+    query_string = ''
+    if ('query' in request.GET) and request.GET['query']!="":
+        query_string = request.GET['query']
+        
+        entry_query = get_query(query_string, ['uni__Uniname', 'Gname'])
+        a=Groups.objects.all().filter(entry_query)
+        
+        return a
+       
+    else:
+        return Groups.objects.all()
+
+
+def filter_by_category(request, user_list):
+    
+    if ('UniCat' in request.GET): 
+        if request.GET['UniCat']!="":
+            user_list=user_list.filter(uni__Uniname__icontains=request.GET['UniCat'])
+    if ('GroupCat' in request.GET):
+        if request.GET['GroupCat']!="":
+            user_list=user_list.filter(grp__Gname__icontains=request.GET['GroupCat'])
+    if ('RoleCat' in request.GET):
+        if request.GET['RoleCat']!="":
+            user_list=user_list.filter(role__RoleType__icontains=request.GET['RoleCat'])
+    return user_list
+
+
+
 def manageUserFilter(request):
     
-    query_string = ''
     found_entries = None
     if getRole(request)=="UniAdmin":
         
@@ -372,38 +433,76 @@ def manageUserFilter(request):
                 
     if getRole(request)=="CAIRAdmin":
         grps = Groups.objects.all()
+
     
-    if ('query' in request.GET) and request.GET['query'].strip():
-        query_string = request.GET['query']
 
-        entry_query = get_query(query_string, ['first_name', 'last_name'])
 
-        user_list= getFilteredUsers(request).filter(entry_query)
-        context = {
+    user_list = filter_by_category(request,filter_by_nameDash(request))
+    
+    
+
+    context = {
                 
-                'Role': getRole(request),
+                'Roles': Role.objects.all(),
                 'users': user_list,
-                'UniCategory': University.objects.all()
+                'groups': grps,
+                'UniCategory': University.objects.all(),
+                'Role' : getRole(request),
+                'selectedUni': request.GET['UniCat'],
+                'selectedRole': request.GET['RoleCat'],
+                'selectedGroup': request.GET['GroupCat']
+
                 
                 }
-        
-        return render(request,'list_users.html',context)
-    else:
-        user_list = getFilteredUsers(request)
-        context = {
-                
-                'Role': getRole(request),
-                'users': user_list,
-                'UniCategory': University.objects.all()
-                }
-        
-    if request.GET['UniCat']=="":
-        user_list=user_list.filter(uni__Uniname__icontains=request.user.uni)
-    if request.GET['GroupCat']=="":
-        user_list.filter(grp__Gname__icontains=request.user.grp)
-    if request.GET['RoleCat']=="":
+    
     return render(request, 'list_users.html',context)
 
+
+def searchPeopleResult(request):
+    a=""
+    b=""
+    c=""
+    d=""
+    if ('UniCat' in request.GET):
+        a=request.GET['UniCat']
+    if ('GroupCat' in request.GET):
+        b=request.GET['GroupCat']
+    if ('RoleCat' in request.GET):
+        c=request.GET['RoleCat']
+    if ('query' in request.GET):
+        d = request.GET['query']
+    
+    
+    context ={
+            'users':filter_by_category(request,filter_by_nameAll(request)),
+            'groups': Groups.objects.all(),
+            'UniCategory': University.objects.all(),
+                'selectedUni':a,
+                'selectedRole': c,
+                'selectedGroup': b,
+                'searchName': d,
+                'Roles': Role.objects.all(),
+
+    }
+    return render(request, 'PeopleSearchResults.html', context)
+
+def searchGroupsResult(request):
+    a=""
+    
+    if ('UniCat' in request.GET):
+        a=request.GET['UniCat']
+    
+    
+    
+    context = {
+            
+            'groups': filter_by_category(request,filter_group_by_nameAll(request)),
+            'UniCategory': University.objects.all(),
+                'selectedUni':a,
+                
+    }
+
+    return render (request, 'GroupSearchResult.html', context)
 
 # def manageUserFilter(request):
    

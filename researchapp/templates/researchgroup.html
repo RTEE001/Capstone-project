@@ -69,160 +69,41 @@ Research Groups
   <!-- End Example Code -->
      <br>
      <br>
-     <h2 class="featurette-heading fw-normal lh-1" style="text-align:center;" >Explore Research Groups </h2>
+     <h4 class="featurette-heading fw-normal lh-1" style="text-align:center;" >Explore Research Groups </h4>
 
-
+<a  class="btn btn-sm btn-success" href="{% url 'searchGroupResult'%}" style="padding: 8px; float: left; background-color: blue; color: white;">Search or Filter</a>
 
 <br>
 <hr class="featurette-divider">
+
 <br>
 
-
-     <div class="row">
+<div class="row">
+{% for group in groups %}
+   
        <div class="column">
          <div class="card">
 
-           <img src="{% static 'media/unistele.png' %}" width="120" height="120" xmlns="http://www.w3.org/2000/svg"
+           <img src="{{ group.uni.image.url }}" width="120" height="120" xmlns="http://www.w3.org/2000/svg"
            role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false">
 
-           <p><a href="{% url 'about' %}">Computational Thinking for AI</a></p>
+           <p><a href="{% url 'about' %}">{{ group.Gname}}</a></p>
 
 
 
          </div>
        </div>
 
-       <div class="column">
-         <div class="card">
+       
+    
+     {% if forloop.counter|divisibleby:4 %}
+      <br>
+      <div class="row">
+      {% endif %}
+{% endfor %}
+    
 
-          <img src="{% static 'media/uct.png' %}" width="120" height="100" xmlns="http://www.w3.org/2000/svg"
-          role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false">
-
-          <p><a href="{% url 'about' %}">Adaptive and Cognitive Systems Lab</a></p>
-
-
-
-         </div>
-       </div>
-
-       <div class="column">
-         <div class="card">
-
-        <br>
-        <img src="{% static 'media/UP.png' %}" width="110" height="120" xmlns="http://www.w3.org/2000/svg"
-        role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false">
-
-        <p><a href="{% url 'about' %}">Ethics of AI</a></p>
-
-
-
-         </div>
-       </div>
-
-       <div class="column">
-         <div class="card">
-
-         <img src="{% static 'media/uwc.png' %}" width="120" height="120" xmlns="http://www.w3.org/2000/svg"
-         role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false">
-
-         <p><a href="{% url 'about' %}">AI and Cybersecurity</a></p>
-
-
-         </div>
-       </div>
-     </div>
-
-     <br>
-
-     <div class="row">
-       <div class="column">
-         <div class="card">
-
-         <img src="{% static 'media/nwu.png' %}" width="120" height="120" xmlns="http://www.w3.org/2000/svg"
-         role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false">
-
-         <p><a href="{% url 'about' %}">CAIR Deep Learning</a></p>
-
-
-         </div>
-       </div>
-
-       <div class="column">
-         <div class="card">
-
-         <img src="{% static 'media/UP.png' %}" width="120" height="100" xmlns="http://www.w3.org/2000/svg"
-         role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false">
-
-         <p><a href="{% url 'about' %}">AI for Development & Innovation</a></p>
-
-
-         </div>
-       </div>
-
-       <div class="column">
-         <div class="card">
-
-         <img src="{% static 'media/turf.png'%}" width="130" height="120" xmlns="http://www.w3.org/2000/svg"
-         role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false">
-
-         <p><a href="{% url 'about' %}">Speech Technologies</a></p>
-
-
-         </div>
-       </div>
-
-       <div class="column">
-         <div class="card">
-
-         <img src="{% static 'media/ukzn.png' %}" width="120" height="140" xmlns="http://www.w3.org/2000/svg"
-         role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false">
-
-         <p><a href="{% url 'about' %}">CAIR@UKZN</a></p>
-
-
-         </div>
-         </div>
-       </div>
-
-
-     <br>
-
-     <div class="row">
-       <div class="column">
-         <div class="card">
-
-         <img src="{% static 'media/UP.png' %}" width="120" height="120" xmlns="http://www.w3.org/2000/svg"
-         role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false">
-
-         <p><a href="{% url 'about' %}">Statistics@CAIR-UP</a></p>
-
-
-         </div>
-       </div>
-
-       <div class="column">
-         <div class="card">
-
-         <img src="{% static 'media/uct.png' %}" width="120" height="100" xmlns="http://www.w3.org/2000/svg"
-         role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false">
-
-         <p><a href="{% url 'about' %}">Knowledge Representation and Reasoning</a></p>
-
-
-         </div>
-       </div>
-
-       <div class="column">
-         <div class="card">
-
-         <img src="{% static 'media/sol.png' %}" width="120" height="120" xmlns="http://www.w3.org/2000/svg"
-         role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false">
-
-         <p><a href="{% url 'about' %}">Swarm Intelligence Lab</a></p>
-
-
-         </div>
-       </div>
+      
 
 
 
