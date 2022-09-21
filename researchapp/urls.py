@@ -9,8 +9,10 @@ urlpatterns = [
     path('research/', views.research, name = 'research'),
     path('logged/',views.login1, name = 'loggedin'),
     path('logout/',views.logoutView, name = 'loggedout'),
-    path('researchgroup', views.researchgroup, name = 'researchgroup'),
-    path('signin', views.signin, name = 'signin'),
+    path('researchgroup/', views.researchgroup, name = 'researchgroup'),
+    path('signin/', views.signin, name = 'signin'),
+    path('searchPeopleResult/', views.searchPeopleResult, name = 'searchPeopleResult'),
+    path('searchGroupResult/', views.searchGroupsResult,name='searchGroupResult'),
 #admin
     path('aluser/', views.ListUserView.as_view(), name='aluser'),
     path('alvuser/<int:pk>', views.ALViewUser.as_view(), name='alvuser'),
