@@ -13,6 +13,8 @@ urlpatterns = [
     path('signin/', views.signin, name = 'signin'),
     path('searchPeopleResult/', views.searchPeopleResult, name = 'searchPeopleResult'),
     path('searchGroupResult/', views.searchGroupsResult,name='searchGroupResult'),
+    path('avprofle/<int:pk>', views.AViewProfile.as_view(), name='avprofile'),
+    path('avGprofle/<int:pk>', views.AViewGroupProfile.as_view(), name='avGprofile'),
 #admin
     path('aluser/', views.ListUserView.as_view(), name='aluser'),
     path('alvuser/<int:pk>', views.ALViewUser.as_view(), name='alvuser'),

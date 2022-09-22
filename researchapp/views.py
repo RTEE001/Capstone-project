@@ -504,6 +504,46 @@ def searchGroupsResult(request):
 
     return render (request, 'GroupSearchResult.html', context)
 
+
+class AViewProfile(LoginRequiredMixin,DetailView):
+    model=User
+    template_name = 'viewProfile.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super(AViewProfile, self).get_context_data(**kwargs)
+        author_id = self.kwargs['pk']
+        query=""
+        query_string= User.objects.all().filter(id=author_id)
+        for i in query_string:
+            query+=str(i.first_name)+" "+str(i.last_name)
+            
+        entry_query = get_query(query, ['author', 'co_author'])
+        a=Paper.objects.all().filter(entry_query)
+        
+       
+        context['papers'] = a
+        
+        return context
+
+class AViewGroupProfile(LoginRequiredMixin,DetailView):
+    model=Groups
+    template_name = 'viewGroupProfile.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super(AViewGroupProfile, self).get_context_data(**kwargs)
+        author_id = self.kwargs['pk']
+        query=""
+        query_string= Groups.objects.all().filter(id=author_id)
+        for i in query_string:
+            query+=str(i.Gname)
+            
+        entry_query = get_query(query, ['Gname'])
+        a=Groups.objects.all().filter(entry_query)
+        
+       
+        context['papers'] = a
+        
+        return context
 # def manageUserFilter(request):
    
 #     query = request.GET['query']

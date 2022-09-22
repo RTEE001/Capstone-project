@@ -56,14 +56,13 @@
                                      <div class="col-md-4 mb-3">
                                          <div class="card">
                                              <img class="img-fluid" alt="100%x280"
-
                                              src= {% if user.uni.image %}{{ user.uni.image.url }}{% else %} {% static 'media/logo.svg' %}{% endif %} style="width:100px;height:100px">
 
 
                                              <div class="card-body">
                                                  <h4 class="card-title">{{user.first_name}} {{user.last_name}}</h4>
                                                  <p class="card-text">{{user.role}}</p>
-                                                 <p><a href="{% url 'home' %}">View Profile</a></p>
+                                                 <p><a href="{% url 'avprofile' user.pk %}">View Profile</a></p>
 
                                              </div>
 
