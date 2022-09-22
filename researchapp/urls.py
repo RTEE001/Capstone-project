@@ -10,8 +10,8 @@ urlpatterns = [
     path('logged/',views.login, name = 'homelogged'),
     path('logout/',views.logoutView, name = 'loggedout'),
 
-
-    path('papers/', views.show_paper_results_by_date, name = 'papers'),
+    path('papers/', views.filter_papers, name = 'papers'),
+    path('reports/', views.reports, name = 'reports'),
     path('papers_pdf/', views.generate_pdf, name = 'paperpdf'),
     path('search_paper/', views.search_paper, name="search_paper"),
 

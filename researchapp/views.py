@@ -1,3 +1,4 @@
+from unicodedata import category
 from django.shortcuts import render, redirect
 from .models import *
 from django.contrib.auth import authenticate, login, logout
@@ -14,6 +15,7 @@ from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 import re
 from django.db.models import Q
+from itertools import chain
 # Create your views here.
 '''
 Collect items from database and pass them to a template
@@ -112,15 +114,59 @@ def index(request):
 def h(request):
     return render(request,'h.html')
 
-def show_paper_results_by_date(request):
-    if request.method == 'POST':     
+
+def filter_papers(request):
+    papers = Paper.objects.all()
+    groups = Groups.objects.all()
+    unis = University.objects.all()
+    type = ResearchCategory.objects.all()
+    context = {
+        'papers': papers,
+        'groups': groups,
+        'type': type,
+        'unis': unis
+    }
+    if request.method == 'POST':
+           
         startdate = request.POST.get('startdate')
         enddate = request.POST.get('enddate')
-        search_result = Paper.objects.filter(created__range = [startdate, enddate])
-        return render(request, 'paper.html', {'papers': search_result})
+        type = request.POST.get('type')
+        group = request.POST.get('GroupCat')
+        if startdate == '' and enddate == '' and type == '':
+            print('path 1')
+            return render(request, 'paper.html', context)
+        elif (startdate == '' or enddate == '') and type != '':
+            print('path 2')
+            filter = Paper.objects.filter(category__name__contains = type)
+            context ={
+                'papers':filter
+            }
+            print(filter)
+            return render(request, 'paper.html', context)
+
+        elif startdate != '' and enddate != '' and type == '':
+            print('path 3')
+            filter = Paper.objects.filter(created__range = [startdate, enddate])
+            print(filter)
+            context ={
+                'papers':filter
+            }
+            return render(request, 'paper.html', context)
+                    
+        else: 
+            print('path 4')
+            filter = Paper.objects.filter(created__range = [startdate, enddate], category__name__contains = type)
+            print(filter)
+            context = {     
+                'papers':filter
+        
+            }
+            return render(request, 'paper.html',context)
+      
+        
     else:
-        display_paper = Paper.objects.all()
-        return render(request, 'paper.html', {'papers':display_paper})
+       
+        return render(request, 'paper.html', context)
 
 #
 
@@ -188,7 +234,8 @@ def generate_pdf(request):
     buffer.seek(0)
     return FileResponse(buffer, as_attachment=True, filename = 'papers_report.pdf')
 
-
+def reports(request):
+    return render(request, 'reports.html')
 
 # searching 
 def normalize_query(query_string,

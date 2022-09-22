@@ -2,3 +2,40 @@
 {% load static %}
 
 {% block style %}href="{% static 'css/research.css' %}"{% endblock %}
+
+{% block body %}
+<body>
+    <center>
+            
+        <hr>
+        <form method = 'GET'>
+            
+            {{filter.form}}
+         
+
+        </hr>
+        <table border = '1'>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Co_author</th>
+                <th>Description</th>
+                <th>View</th>
+               
+            </tr>
+            {% for paper in papers%}
+            <tr> 
+                <td>{{paper.title}}</td>
+                <td>{{paper.author}}</td>
+                <td>{{paper.co_author}}</td>
+                <td>{{paper.description}}</td>
+                <td><a href = '{{ paper.pdf.url }}'> download </a></td>
+             
+            </tr>
+            {% endfor%}
+        </table>
+    </center>
+</body>
+<html>
+
+    {% endblock %}

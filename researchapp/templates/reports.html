@@ -1,0 +1,34 @@
+{%load static%}
+
+<!DOCTYPE html>
+<head>
+    <title> Reports </title>
+</head>
+
+<body>
+    <center>
+        <h1> Reports <h1>
+            
+
+        <hr>
+
+        
+        <form method = 'POST'>
+            {% csrf_token %}
+         Start Date:<input type = 'date' name = 'startdate'/>
+         End Date:<input type = 'date' name = 'enddate'/>
+
+     
+         <label for="GroupCat"><b>Group</b></label>
+         <select id="category" class="form-control "name="GroupCat" required>
+         <option selected> choose Group...</option>
+         {% for group in groups%} 
+         <option value={{group.group_name}} >{{group.group_name}}
+            
+         </option>
+         {% endfor %}
+     
+        </table>
+    </center>
+</body>
+<html>
