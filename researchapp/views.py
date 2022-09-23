@@ -1,11 +1,13 @@
 from email.headerregistry import ContentTransferEncodingHeader
 from http.client import HTTPResponse
+from multiprocessing import AuthenticationError
 from unicodedata import category
 from django.shortcuts import render, redirect
 from .models import *
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
+from django.contrib import messages
 from django.views import generic
 from django.views.generic import  DetailView, UpdateView
 from .forms import UserForm
@@ -22,10 +24,14 @@ from django.template.loader import render_to_string
 from weasyprint import HTML
 import tempfile
 
+
+from django.http import HttpResponseRedirect
+from .forms import UploadForm
 # Create your views here.
 '''
 Collect items from database and pass them to a template
 '''
+
 class ALViewUser(DetailView):
     model = User
     template_name='user_detail.html'
@@ -93,6 +99,22 @@ def logoutView(request):
     logout(request)
     return redirect('home')
        
+def upload_paper(request):
+ 
+    if request.method == 'POST':
+        form = UploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.info(request, 'publication uploaded successfully')
+            return render(request,'home.html')
+        else:  
+            messages.info(request, 'peer review is missing')
+    form = UploadForm()
+    return render(request, 'upload.html', {'form': form})
+
+
+
+
 
 def login1(request):
     if request.method == 'POST':
@@ -176,7 +198,7 @@ def filter_papers(request):
 
 #
 
-def reports(request):
+def reports_context(request):
     type = ResearchCategory.objects.all()
     context = {
             'type': type
@@ -185,6 +207,54 @@ def reports(request):
     if request.method == 'POST':
             
             startdate= request.POST.get('startdate')
+            enddate = request.POST.get('enddate')
+            type = request.POST.get('type')
+        
+            if startdate == '' and enddate == '' and type == '':
+                print('path 1')
+                return  context
+            elif (startdate == '' or enddate == '') and type != '':
+                print('path 2')
+                filter = Paper.objects.filter(category__name__contains = type)
+                context ={
+                    'filter':filter.count()
+                }
+                print(filter)
+                return context
+
+            elif startdate != '' and enddate != '' and type == '':
+                print('path 3')
+                filter = Paper.objects.filter(created__range = [startdate, enddate])
+                print(filter)
+                context ={
+                    'filter':filter.count()
+                }
+                return context
+                        
+            else: 
+                print('path 4')
+                filter = Paper.objects.filter(created__range = [startdate, enddate], category__name__contains = type)
+                print(filter)
+                context = {     
+                    'filter':filter.count()
+            
+                }
+                return context
+        
+            
+    else:
+    
+        return context
+
+def reports(request):
+    type = ResearchCategory.objects.all()
+    context = {
+            'type': type
+        }
+
+    if request.method == 'POST':
+            
+            startdate = request.POST.get('startdate')
             enddate = request.POST.get('enddate')
             type = request.POST.get('type')
         
@@ -223,19 +293,14 @@ def reports(request):
     else:
     
         return render(request, 'reports.html', context)
-
 ##needs work
 def generate_pdf(request):
     response = HttpResponse(content_type = 'application/pdf')
     response['Content-Disposition'] = 'inline; attachment; filename = report.pdf'
 
     response['Content-Transfer-Encoding'] = 'binary'
-
-
-    # type = ResearchCategory.objects.all()
-    # count = type.count()
-
-    html_string = render_to_string('output.html', {'type': type, 'count': count})
+    print(reports_context(request))
+    html_string = render_to_string('output.html',reports_context(request) )
 
     html = HTML(string = html_string )
     result = html.write_pdf()
@@ -299,4 +364,28 @@ def search_paper(request):
         display_paper = Paper.objects.all()
         return render(request, 'paper.html', {'papers':display_paper})
 
-# def paper_filters(request):
+
+def search(request):
+    
+    query_string = ''
+    found_entries = None
+    if ('search' in request.GET) and request.GET['search'].strip():
+        query_string = request.GET['search']
+
+        entry_query = get_query(query_string, ['title', 'description','author'])
+        entry_query_2 = get_query(query_string, ['username', 'first_name', 'last_name'])
+        paper_list= Paper.objects.filter(entry_query)
+        people_list = User.objects.filter(entry_query_2)
+        context = {
+            'papers':paper_list,
+            'people': people_list
+            }
+        return render(request,'search.html',context )
+    else:
+        display_paper = Paper.objects.all()
+        display_people = User.objects.all()
+        context = {
+            'papers':display_paper,
+            'people': display_people
+            }
+        return render(request, 'search.html', context)

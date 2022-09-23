@@ -12,8 +12,12 @@ urlpatterns = [
 
     path('papers/', views.filter_papers, name = 'papers'),
     path('reports/', views.reports, name = 'reports'),
-    path('papers_pdf/', views.generate_pdf, name = 'paperpdf'),
+    path('papers_pdf/', views.reports_context, name = 'paperpdf'),
     path('search_paper/', views.search_paper, name="search_paper"),
+
+    path('upload/', views.upload_paper, name = 'upload'),
+
+    path('search/', views.search, name = 'search'),
 
 #admin
     path('aluser/', views.ListUserView.as_view(), name='aluser'),

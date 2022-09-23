@@ -37,6 +37,7 @@ class University(models.Model):
 
 class Groups(models.Model):
     Gname = models.CharField(max_length=100)
+    description = models.CharField(max_length=100)
     uni = models.ForeignKey(University, on_delete=models.CASCADE, default=None, null=TRUE)
     def __str__(self):
         return self.Gname
@@ -46,6 +47,7 @@ class User(AbstractUser):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, default=None,blank=True , null=TRUE)
     uni = models.ForeignKey(University, on_delete=models.CASCADE, default=None,blank=True , null=TRUE)
     grp = models.ForeignKey(Groups, on_delete=models.CASCADE, default=None,blank=True , null=TRUE)
+    bio = models.CharField(max_length=100, blank=True , null=TRUE)
     def __str__(self):
         return self.username
 
@@ -57,7 +59,7 @@ class Paper(models.Model):
     category  = models.ForeignKey(ResearchCategory, on_delete=models.CASCADE, default=None,blank=True , null=TRUE)
     group = models.ForeignKey(Groups, on_delete=models.CASCADE, default=None,blank=True , null=TRUE)
     pdf = models.FileField(upload_to='pdf/publications')
-    peerReview = models.FileField(upload_to='pdf/peerReview',blank=True , null=True)
+    peerReview = models.FileField(upload_to='pdf/peerReview', blank=True , null=TRUE)
     created = models.DateField(auto_now_add=True)
     def __str__(self):
         return self.title
