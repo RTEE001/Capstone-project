@@ -1,5 +1,3 @@
-from email.headerregistry import ContentTransferEncodingHeader
-from http.client import HTTPResponse
 from unicodedata import category
 from django.shortcuts import render, redirect
 from .models import *
@@ -11,16 +9,20 @@ from django.views.generic import  DetailView, UpdateView
 from .forms import UserForm
 from django.contrib.auth import authenticate, logout
 import io
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 import re
-from django.db.models import Q, Sum
+from django.db.models import Q
 
-from django.template.loader import render_to_string
-from weasyprint import HTML
-import tempfile
+
+import os
+from django.conf import settings
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.contrib.staticfiles import finders
 
 # Create your views here.
 '''
@@ -176,6 +178,44 @@ def filter_papers(request):
 
 #
 
+##needs work
+def generate_pdf(request):
+    type = ResearchCategory.objects.all()
+    template_path = 'reports.html'
+    context = {'type': type}
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'filename="report.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+    # buffer = io.BytesIO()
+    # pdf_object = canvas.Canvas(buffer, pagesize = letter, bottomup = 0)
+    # text_object =  pdf_object.beginText()
+    # text_object.setTextOrigin(inch, inch)
+    # text_object.setFont('Helvetica', 14)
+    # papers = Paper.objects.all()
+    # num_papers = papers.count()
+    # lines = []
+    # lines.append(f'Total number of papers: {num_papers}')
+    
+    # for line in lines:
+    #     text_object.textLine(line)
+    #     text_object.textLine(print())
+    # pdf_object.drawText(text_object)
+    # pdf_object.showPage()
+    # pdf_object.save()
+    # buffer.seek(0)
+    # return FileResponse(buffer, as_attachment=True, filename = 'papers_report.pdf')
+
 def reports(request):
     type = ResearchCategory.objects.all()
     context = {
@@ -184,7 +224,7 @@ def reports(request):
 
     if request.method == 'POST':
             
-            startdate= request.POST.get('startdate')
+            startdate = request.POST.get('startdate')
             enddate = request.POST.get('enddate')
             type = request.POST.get('type')
         
@@ -223,31 +263,6 @@ def reports(request):
     else:
     
         return render(request, 'reports.html', context)
-
-##needs work
-def generate_pdf(request):
-    response = HttpResponse(content_type = 'application/pdf')
-    response['Content-Disposition'] = 'inline; attachment; filename = report.pdf'
-
-    response['Content-Transfer-Encoding'] = 'binary'
-
-
-    type = ResearchCategory.objects.all()
-    count = type.count()
-
-    html_string = render_to_string('output.html', {'type': type, 'count': count})
-
-    html = HTML(string = html_string )
-    result = html.write_pdf()
-
-    with tempfile.NamedTemporaryFile(delete=True) as output:
-        output.write(result)
-        output.flush()
-
-        output = open(output.name, 'rb')
-        response.write(output.read())
-
-    return response
 
 # searching 
 def normalize_query(query_string,
@@ -300,3 +315,27 @@ def search_paper(request):
         return render(request, 'paper.html', {'papers':display_paper})
 
 # def paper_filters(request):
+
+def generate_pdf(request):
+    response = HttpResponse(content_type = 'application/pdf')
+    response['Content-Disposition'] = 'inline; attachment; filename = report.pdf'
+
+    response['Content-Transfer-Encoding'] = 'binary'
+
+
+    type = ResearchCategory.objects.all()
+    count = type.count()
+
+    html_string = render_to_string('output.html', {'type': type, 'count': count})
+
+    html = HTML(string = html_string )
+    result = html.write_pdf()
+
+    with tempfile.NamedTemporaryFile(delete=True) as output:
+        output.write(result)
+        output.flush()
+
+        output = open(output.name, 'rb')
+        response.write(output.read())
+
+    return response

@@ -8,43 +8,30 @@
 <body>
     <center>
         <h1> Filter papers <h1>
+
+        <hr>
       
         <form method = 'POST'>
             {% csrf_token %}
-         
-          <label for="dates">start date:</label>
-        <input type="date" id="date" name="startdate">
-
-        <label for="dates">end date:</label>
-        <input type="date" id="date" name="enddate">
+            <label for="dates">start date:</label>
+            <input type="date" id="date" name="startdate">
+    
+            <label for="dates">end date:</label>
+            <input type="date" id="date" name="enddate">
      
-        {% comment %} <label for="GroupCat"><b>Group</b></label>
-         <select id="GroupCat" name="GroupCat"> 
-         <option selected> choose Group...</option>
-         {% for group in groups%} 
-         <option value={{group.Gname}} >{{group.Gname}}
-         </option>
-         {% endfor %}  {% endcomment %}
+            <label for="type"><b>type</b></label>
+            <select id="type" name="type">
+            <option selected> </option>
+            {% for typ in type%} 
+            <option value={{typ.name}} >{{typ.name}}  
+            </option>
+            {% endfor %}
+     
 
-         <label for="type"><b>type</b></label>
-         <select id="type" name="type">
-         <option selected> </option>
-         {% for typ in type%} 
-         <option value={{typ.name}} >{{typ.name}}  
-         </option>
-         {% endfor %} 
-{% comment %} 
-         <label for="UniCat"><b>Uni</b></label>
-         <select id="category"  name="UniCat"> {% endcomment %}
-         {% comment %} <option selected> choose Uni...</option>
-         {% for group in groups%} 
-         <option value={{group.uni}} >{{group.uni}}
-            
-         </option>
-         {% endfor %} {% endcomment %}
 
+ 
         <input type = 'submit' name = 'Search'/>
-        </form>
+      
         <table border = '1'>
             <tr>
                 <th>Title</th>
@@ -52,7 +39,6 @@
                 <th>Co_author</th>
                 <th>Description</th>
                 <th>View</th>
-                <th>category</th>
                
             </tr>
             {% for paper in papers%}
@@ -62,7 +48,6 @@
                 <td>{{paper.co_author}}</td>
                 <td>{{paper.description}}</td>
                 <td><a href = '{{ paper.pdf.url }}'> download </a></td>
-                <td>{{paper.category}}</td>
              
             </tr>
             {% endfor%}

@@ -2,33 +2,43 @@
 
 <!DOCTYPE html>
 <head>
-    <title> Reports </title>
+    <title> REports </title>
 </head>
 
 <body>
     <center>
-        <h1> Reports <h1>
-            
-
-        <hr>
-
-        
+      
         <form method = 'POST'>
             {% csrf_token %}
-         Start Date:<input type = 'date' name = 'startdate'/>
-         End Date:<input type = 'date' name = 'enddate'/>
+         
+         <label for="dates">start date:</label>
+        <input type="date" id="date" name="startdate">
 
-     
-         <label for="GroupCat"><b>Group</b></label>
-         <select id="category" class="form-control "name="GroupCat" required>
-         <option selected> choose Group...</option>
-         {% for group in groups%} 
-         <option value={{group.group_name}} >{{group.group_name}}
-            
+        <label for="dates">end date:</label>
+        <input type="date" id="date" name="enddate"> 
+
+         <label for="type"><b>type</b></label>
+         <select id="type" name="type">
+         <option selected> </option>
+         {% for typ in type%} 
+         <option value={{typ.name}} >{{typ.name}}  
          </option>
-         {% endfor %}
-     
-        </table>
+         {% endfor %} 
+
+
+        <input type = 'submit' name = 'Search'/>
+        </form>
+        <h1> reports <h1>
+            <hr>
+           <a href = "{% url 'paperpdf' %}" > Generate report </a>
+        </hr>
+
+        <p> Number of papers </p>
+        {% if filter %}
+        {{filter}}
+        {%else%}
+        <p> 0 </p>
+            {% endif%}
     </center>
 </body>
 <html>
