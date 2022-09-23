@@ -232,8 +232,8 @@ def generate_pdf(request):
     response['Content-Transfer-Encoding'] = 'binary'
 
 
-    type = ResearchCategory.objects.all()
-    count = type.count()
+    # type = ResearchCategory.objects.all()
+    # count = type.count()
 
     html_string = render_to_string('output.html', {'type': type, 'count': count})
 

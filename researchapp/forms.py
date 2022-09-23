@@ -14,7 +14,7 @@ class UserForm(forms.ModelForm):
         model = User
         fields = ('username', 'password')
 
-class PaperForm(forms.ModelForm):
+class UploadForm(forms.ModelForm):
     class Meta:
         model = Paper
         fields = '__all__'
