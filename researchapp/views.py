@@ -1,7 +1,3 @@
-from email.headerregistry import ContentTransferEncodingHeader
-from http.client import HTTPResponse
-from multiprocessing import AuthenticationError
-from unicodedata import category
 from django.shortcuts import render, redirect
 from .models import *
 from django.contrib.auth import authenticate, login, logout
@@ -11,22 +7,16 @@ from django.contrib import messages
 from django.views import generic
 from django.views.generic import  DetailView, UpdateView
 from .forms import UserForm
-from django.contrib.auth import authenticate, logout
-import io
-from django.http import FileResponse, HttpResponse
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter
+from django.http import HttpResponse
 import re
-from django.db.models import Q, Sum
-
-from django.template.loader import render_to_string
-from weasyprint import HTML
-import tempfile
+from django.db.models import Q
 
 
-from django.http import HttpResponseRedirect
 from .forms import UploadForm
+
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 # Create your views here.
 '''
 Collect items from database and pass them to a template
@@ -198,122 +188,83 @@ def filter_papers(request):
 
 #
 
-def reports_context(request):
-    type = ResearchCategory.objects.all()
-    context = {
-            'type': type
-        }
-
-    if request.method == 'POST':
-            
-            startdate= request.POST.get('startdate')
-            enddate = request.POST.get('enddate')
-            type = request.POST.get('type')
-        
-            if startdate == '' and enddate == '' and type == '':
-                print('path 1')
-                return  context
-            elif (startdate == '' or enddate == '') and type != '':
-                print('path 2')
-                filter = Paper.objects.filter(category__name__contains = type)
-                context ={
-                    'filter':filter.count()
-                }
-                print(filter)
-                return context
-
-            elif startdate != '' and enddate != '' and type == '':
-                print('path 3')
-                filter = Paper.objects.filter(created__range = [startdate, enddate])
-                print(filter)
-                context ={
-                    'filter':filter.count()
-                }
-                return context
-                        
-            else: 
-                print('path 4')
-                filter = Paper.objects.filter(created__range = [startdate, enddate], category__name__contains = type)
-                print(filter)
-                context = {     
-                    'filter':filter.count()
-            
-                }
-                return context
-        
-            
-    else:
-    
-        return context
 
 def reports(request):
-    type = ResearchCategory.objects.all()
+
+    group = Groups.objects.all()
+    unis = University.objects.all()
     context = {
-            'type': type
+           
+            'groups': group,
+            'university': unis
         }
 
     if request.method == 'POST':
             
             startdate = request.POST.get('startdate')
             enddate = request.POST.get('enddate')
-            type = request.POST.get('type')
-        
-            if startdate == '' and enddate == '' and type == '':
-                print('path 1')
-                return render(request, 'reports.html', context)
-            elif (startdate == '' or enddate == '') and type != '':
-                print('path 2')
-                filter = Paper.objects.filter(category__name__contains = type)
-                context ={
-                    'filter':filter.count()
+            univ= request.POST.get('uni')
+            group = request.POST.get('group')
+
+            if startdate == '' and enddate == ''  and univ =='' and group != '':
+                total_papers = Paper.objects.filter(group__Gname__contains = group)
+                context = {
+                    'filter':total_papers 
                 }
-                print(filter)
                 return render(request, 'reports.html', context)
 
-            elif startdate != '' and enddate != '' and type == '':
-                print('path 3')
-                filter = Paper.objects.filter(created__range = [startdate, enddate])
-                print(filter)
-                context ={
-                    'filter':filter.count()
-                }
-                return render(request, 'reports.html', context)
+            # elif (startdate == '' or enddate == '')  and group !='' and uni !='':
+            #     filter = Paper.objects.filter(category__name__contains = type)
+            #     context ={
+            #         'filter':filter.count()
+            #     }
+             
+            #     return render(request, 'reports.html', context)
+
+            # elif startdate != '' and enddate != '' and type == '':
+            #     filter = Paper.objects.filter(created__range = [startdate, enddate])
+              
+            #     context ={
+            #         'filter':filter.count()
+            #     }
+            #     return render(request, 'reports.html', context)
                         
-            else: 
-                print('path 4')
-                filter = Paper.objects.filter(created__range = [startdate, enddate], category__name__contains = type)
-                print(filter)
-                context = {     
-                    'filter':filter.count()
+            # else: 
+            #     filter = Paper.objects.filter(created__range = [startdate, enddate], category__name__contains = type)
+              
+            #     context = {     
+            #         'filter':filter.count()
             
-                }
-                return render(request, 'reports.html',context)
-        
+            #     }
+            #     return render(request, 'reports.html', context)       
             
     else:
     
         return render(request, 'reports.html', context)
 ##needs work
 def generate_pdf(request):
-    response = HttpResponse(content_type = 'application/pdf')
-    response['Content-Disposition'] = 'inline; attachment; filename = report.pdf'
+ 
+    template_path = 'reports.html'
+    filter = Paper.objects.filter(group__Gname__contains = request.POST['group'])
+    context = {"filter":filter.count()}
+    print('context begins')
+   
+    print(context)
+    print('context ends')
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'filename="report.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
 
-    response['Content-Transfer-Encoding'] = 'binary'
-    print(reports_context(request))
-    html_string = render_to_string('output.html',reports_context(request) )
-
-    html = HTML(string = html_string )
-    result = html.write_pdf()
-
-    with tempfile.NamedTemporaryFile(delete=True) as output:
-        output.write(result)
-        output.flush()
-
-        output = open(output.name, 'rb')
-        response.write(output.read())
-
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
-
 # searching 
 def normalize_query(query_string,
                     findterms=re.compile(r'"([^"]+)"|(\S+)').findall,

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 from django.forms import ModelForm
 from django import forms
-from researchapp.models import Paper
+from researchapp.models import Groups, Paper
 from django.core.exceptions import ValidationError     
 
 
@@ -25,3 +25,12 @@ class UploadForm(forms.ModelForm):
                 )
         else:
             return data
+
+
+class ReportForm(forms.ModelForm):
+    startdate= forms.DateField()
+    enddate= forms.DateField()
+
+    class Meta:
+        model = Groups
+        fields = ('Gname', 'uni' , 'startdate', 'enddate')

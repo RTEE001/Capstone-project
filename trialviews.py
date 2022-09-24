@@ -1,29 +1,4 @@
-from unicodedata import category
-from django.shortcuts import render, redirect
-from .models import *
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.messages.views import SuccessMessageMixin
-from django.urls import reverse_lazy
-from django.views import generic
-from django.views.generic import  DetailView, UpdateView
-from .forms import UserForm
-from django.contrib.auth import authenticate, logout
-import io
-from django.http import FileResponse
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter
-import re
-from django.db.models import Q
-
-
-import os
-from django.conf import settings
-from django.http import HttpResponse
-from django.template.loader import get_template
-from xhtml2pdf import pisa
-from django.contrib.staticfiles import finders
-
+filter = Paper.objects.filter(category__name__contains = type)
 # Create your views here.
 '''
 Collect items from database and pass them to a template
@@ -339,3 +314,53 @@ def generate_pdf(request):
         response.write(output.read())
 
     return response
+
+
+
+    def reports(request):
+    
+    group = Groups.objects.all()
+    unis = University.objects.all()
+    context = {
+           
+            'groups': group,
+            'university': unis
+        }
+
+    if request.method == 'POST':
+            
+            startdate = request.POST.get('startdate')
+            enddate = request.POST.get('enddate')
+            
+
+            if startdate == '' and enddate == ''  and uni =='' and group == '':
+                return render(request, 'reports.html', context)
+
+            elif (startdate == '' or enddate == '')  and group !='' and uni !='':
+                filter = Paper.objects.filter(category__name__contains = type)
+                context ={
+                    'filter':filter.count()
+                }
+             
+                return render(request, 'reports.html', context)
+
+            elif startdate != '' and enddate != '' and type == '':
+                filter = Paper.objects.filter(created__range = [startdate, enddate])
+              
+                context ={
+                    'filter':filter.count()
+                }
+                return render(request, 'reports.html', context)
+                        
+            else: 
+                filter = Paper.objects.filter(created__range = [startdate, enddate], category__name__contains = type)
+              
+                context = {     
+                    'filter':filter.count()
+            
+                }
+                return render(request, 'reports.html', context)       
+            
+    else:
+    
+        return render(request, 'reports.html', context)

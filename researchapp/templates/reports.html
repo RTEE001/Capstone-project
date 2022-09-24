@@ -8,37 +8,69 @@
 <body>
     <center>
       
-        <form method = 'POST'>
+        <form mepod = 'POST' action="{% url 'paperpdf' %}">
             {% csrf_token %}
          
-         <label for="dates">start date:</label>
+            <label for="group"><b>group</b></label>
+            <select id="group" name="group">
+            {% for group in groups%} 
+            <option value={{group.Gname}} >{{group.Gname}}  
+            </option>
+            {% endfor %}
+
+
+            
+    
+         <label for="dates">start date</label>
         <input type="date" id="date" name="startdate">
 
-        <label for="dates">end date:</label>
+        <label for="dates">end date</label>
         <input type="date" id="date" name="enddate"> 
 
-         <label for="type"><b>type</b></label>
-         <select id="type" name="type">
-         <option selected> </option>
-         {% for typ in type%} 
-         <option value={{typ.name}} >{{typ.name}}  
-         </option>
-         {% endfor %} 
 
+        <label for="uni"><b>uni</b></label>
+        <select id="uni" name="uni">
+        {% for uni in groups%} 
+        <option value={{uni.Uniname}} >{{uni.Uniname}}  
+        </option>
+        {% endfor %} 
+        
 
         <input type = 'submit' name = 'Search'/>
         </form>
         <h1> reports <h1>
-            <hr>
-           <a href = "{% url 'paperpdf' %}" > Generate report </a>
-        </hr>
+        </center>
+        
+            <p>Date Range: 
+                {%if startdate and enddate%} 
+                {{startdate}} - {{enddate}}
+                {%else%} All time{%endif%}
+            </p>
 
-        <p> Number of papers </p>
-        {% if filter %}
-        {{filter}}
-        {%else%}
-        <p> 0 </p>
-            {% endif%}
-    </center>
+            <p>Group:
+                {%if group%} 
+                {{group}}
+                {%else%} All Groups{%endif%}
+            </p>
+
+            <p>University:
+                {%if university%} 
+                {{university}}
+                {%else%} All Universities{%endif%}
+            </p>
+
+            
+            <p>Total number of papers:</p>
+            <p>Total number of group papers:</p>
+            <p>Total number of University papers:</p>
+            <p>Total number of papers per group:</p>
+            <p>Total number of papers per group:</p>
+            <p>Total number of masters students:</p>
+            <p>Total number of phd students:</p>
+            <p>Total number of students who graduated:</p>
+
+
+    
+   
 </body>
 <html>
