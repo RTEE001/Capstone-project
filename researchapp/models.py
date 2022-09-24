@@ -1,6 +1,7 @@
 
 from audioop import maxpp
 from pickle import TRUE
+from unittest.util import _MAX_LENGTH
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
@@ -53,10 +54,22 @@ class Groups(models.Model):
     def __str__(self):
         return self.Gname
 
+class studentRole(models.Model):
+    name=models.CharField(max_length=100)
+    created=models.DateField(auto_now=True)
+    def __str__(self):
+        return self.name
 class User(AbstractUser):
     
     role = models.ForeignKey(Role, on_delete=models.CASCADE, default=None,blank=True , null=TRUE)
     uni = models.ForeignKey(University, on_delete=models.CASCADE, default=None,blank=True , null=TRUE)
     grp = models.ForeignKey(Groups, on_delete=models.CASCADE, default=None,blank=True , null=TRUE)
+    
+    def save(self, *args, **kwargs):
+        return super().save(*args, **kwargs)
+
+
+    student_role = models.ForeignKey(studentRole, on_delete=models.CASCADE, default=None,blank=True , null=TRUE)
     def __str__(self):
         return self.username
+

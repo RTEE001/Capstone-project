@@ -96,7 +96,17 @@ a {
     <hr>
     {%else%}
     {% endif %}
-    
+    <hr>
+     <label for="StudentRole"><b>Student Role</b></label>
+    <select id="category" class="form-control "name="studentRole" required>
+    <option selected> choose Student Role...</option>
+    {% for studentRole in studentRoles %} 
+    <option value={{studentRole.name}} >{{studentRole.name}}
+	   
+    </option>
+    {% endfor %}
+    </select>
+    </hr>
     
     
     <button type="submit" class="registerbtn">Register</button>

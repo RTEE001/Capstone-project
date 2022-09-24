@@ -1,4 +1,5 @@
 from django.urls import path
+from django.conf.urls import url
 from . import views
 
 urlpatterns = [
@@ -37,6 +38,7 @@ urlpatterns = [
     path('createUAUser/', views.create_uniAdmin, name= 'createUAUser'),
     path('createCAUser/', views.create_CAIRAdmin, name= 'createCAUser'),
     path('createRUser/', views.create_Researcher, name= 'createRUser'),
+    path('change_password', views.passwordChange, name='change_password'),
    
 path('manageusersearch/',views.manageUserFilter, name ='manageusersearch'), 
    path('addUni/', views.addUni, name= 'addUni'),
