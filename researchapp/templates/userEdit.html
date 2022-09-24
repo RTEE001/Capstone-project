@@ -1,4 +1,4 @@
-{% extends 'index.html' %}
+{% extends 'dashboard.html' %}
 {% load static %}
 
 {% block body %}
@@ -15,7 +15,7 @@
             <div class="card mb-3">
                 <div class="card-header">
                     <i class="fas fa-table text-warning"></i>
-                    Details Of Book
+                    Details Of User
                 </div>
                 <div class="card-body">
                     {% for message in messages %}
@@ -26,19 +26,35 @@
 
     <div class="row">
         <div class="col-12">
-            <form method="post" style="background-color: black">
+            <form method="post" style="background-color: white">
                 {% csrf_token %}
                 {% for field in form %}
                     <div class="form-group">
+                    
+                   
                         {{ field.label_tag }}
                         {{ field }}
+                    
                     </div>
                 {% endfor %}
+               
+               
+                
                 <input type="submit" {% if request.path == '/new' %} value="Add" {% else %} value="Update" {% endif %} class="btn btn-success"/>
-                <a href="{% url 'home' %}"><button type="button" class="btn btn-secondary">Back</button></a>
+                <a href="{% url 'listusers' %}"><button type="button" class="btn btn-secondary" >Back</button></a>
+              
             </form>
+            <form method="GET" action="{% url 'change_password' %}">
+            {% csrf_token %}
+  <div class="modal-footer">
+    <input type="hidden" name="key" value="{{user}}" />
+    
+    <button type="submit" name="ID" class="btn btn-primary">{{user}}</button>
+  </div>
+</form>
         </div>
     </div>
+
 
 
           </div>
