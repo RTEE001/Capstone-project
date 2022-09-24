@@ -1,12 +1,14 @@
 from contextlib import nullcontext
 from email import message
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 import re
 from unicodedata import unidata_version
 from urllib import request
 from urllib.parse import uses_fragment
 from wsgiref.util import request_uri
 from django.shortcuts import render, redirect
-from .models import Paper, Role, User, Groups, University
+from .models import Paper, Role, User, Groups, University, studentRole
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils.text import slugify
@@ -14,6 +16,7 @@ from django.shortcuts import redirect, render
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from django.views import generic
+from django.views.generic import CreateView, DetailView, DeleteView, UpdateView, ListView
 from django.db.models import Q  
 import re
 
@@ -44,16 +47,48 @@ class ALViewUser(DetailView):
     template_name='user_detail.html'
 
 
-class AEditUser(UpdateView): 
+    
+def passwordChange(request):
+    if request.method == 'POST' and 'psw' in request.POST :
+        if 'key' in request.POST:
+            new_psw = request.POST['psw']
+            user=User.objects.get(id=request.GET['key'])
+            user.set_password(new_psw)
+            user.save()
+        
+    a=""
+    if 'key' in request.GET:
+        a = request.GET['key']
+    print('this is'+request.method )
+    context={
+        'users': a
+    }
+
+    return render(request, 'changePassword.html', context)
+        
+
+class AEditUser(generic.UpdateView): 
     model = User
     form_class = UserForm
+  
     template_name = 'userEdit.html'
     success_url = reverse_lazy('listusers')
     def get_context_data(self, **kwargs):
+        user_id = self.kwargs['pk']
+        
         context = super().get_context_data(**kwargs)
         
         context['Role'] = getRole(self.request)
+        context['user'] = user_id
+
         return context
+
+
+    def form_invalid(self, form):
+        messages.add_message(self.request, messages.ERROR,
+                             "Please submit the form carefully")
+        print(form.errors.as_data())
+        return redirect('home')
   
 class AEditGroup(UpdateView): 
     model = Groups
@@ -175,13 +210,14 @@ def filterUsersbyrole(request):
         qs = qs.filter(role__RoleType__icontains='student')
     
         
-    print(grps)
+    
     context = {
         'users': qs,
         'groups': grps,
         'Roles' : Role.objects.all(),
         'Role': getRole(request),
-        'UniCategory': University.objects.all()
+        'UniCategory': University.objects.all(),
+        'studentRoles': studentRole.objects.all()
     }
     return context
 
@@ -245,18 +281,19 @@ def create_stuUser(request):
             first_name=request.POST['First']
             last_name=request.POST['Last']
             username=request.POST['username']
+            student_role=request.POST['studentRole']
             email=request.POST['email']
             password=request.POST['psw']
             password = make_password(password)
             if getRole(request)=='Researcher' or getRole(request)=='GroupAdmin':
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), uni=University.objects.get(Uniname__exact=request.user.uni), grp=Groups.objects.get(Gname__exact=request.user.grp))
+                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), uni=University.objects.get(Uniname__exact=request.user.uni), grp=Groups.objects.get(Gname__exact=request.user.grp), student_role=studentRole.objects.get(name__exact=request.POST['studentRole']))
                 a.save()
             elif getRole(request)=='UniAdmin':
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), uni=University.objects.get(Uniname__exact=request.user.uni.Uniname), grp=Groups.objects.get(Gname__exact=request.POST['GroupCat']))
+                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), uni=University.objects.get(Uniname__exact=request.user.uni.Uniname), grp=Groups.objects.get(Gname__exact=request.POST['GroupCat']), student_role=studentRole.objects.get(name__exact=request.POST['studentRole']))
                 a.save()
             else:
                 
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), uni=University.objects.get(Uniname__exact=Groups.objects.get(Gname__exact=request.POST['GroupCat']).uni), grp=Groups.objects.get(Gname__exact=request.POST['GroupCat']))
+                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), uni=University.objects.get(Uniname__exact=Groups.objects.get(Gname__exact=request.POST['GroupCat']).uni), grp=Groups.objects.get(Gname__exact=request.POST['GroupCat']), student_role=studentRole.objects.get(name__exact=request.POST['studentRole']))
                 a.save()
     return redirect('listusers')
 
@@ -544,6 +581,8 @@ class AViewGroupProfile(LoginRequiredMixin,DetailView):
         context['papers'] = a
         
         return context
+
+
 # def manageUserFilter(request):
    
 #     query = request.GET['query']

@@ -200,7 +200,7 @@
        					</li>
 
                  <li>
-       						<a  href="#"><i class="fas fa-cog"></i> Edit Profile</a>
+       						<a  href="{% url 'aeuser' request.user.pk %}"><i class="fas fa-cog"></i> Edit Profile</a>
        					</li>
 
 {% if Role == 'GroupAdmin' or Role == 'Researcher' or Role == 'UniAdmin' or Role == 'CAIRAdmin' or Role == 'Groupleader'%}
