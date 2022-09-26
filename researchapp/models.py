@@ -52,12 +52,16 @@ class User(AbstractUser):
 class Paper(models.Model):
     title = models.CharField(max_length=100)
     author = models.CharField(max_length=50)
+    author_username = models.CharField(max_length=50,default=None,blank=True , null=TRUE)
     co_author = models.CharField(max_length=50)
+    co_author_username = models.CharField(max_length=50,default=None,blank=True , null=TRUE)
     description =  models.TextField()
     category  = models.ForeignKey(PaperType, on_delete=models.CASCADE, default=None,blank=True , null=TRUE)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, default=None,blank=True , null=TRUE)
     publication = models.FileField(upload_to='pdf/publications')
     peerReview = models.FileField(upload_to='pdf/peerReview', blank=True , null=TRUE)
     created = models.DateField(auto_now_add=True)
+    published_by=models.ForeignKey(User, on_delete=models.CASCADE, default=None,blank=True , null=TRUE)
+    
     def __str__(self):
         return self.title
