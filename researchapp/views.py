@@ -616,41 +616,13 @@ def filter_papers(request):
 
 
 def reports(request):
-    startdates= ''
-    enddates = ''
-    universities = ''
-    group = ''
-
-    if 'startdate' in request.GET:
-        startdates = request.GET['startdate']
-    if 'enddate' in request.GET:
-        enddates = request.GET['enddate']
-    if 'group' in request.GET:
-        group = request.GET['group']
-    if 'university' in request.GET:
-        universities = request.GET['university']
-
-    if group != '' and universities !='':
-        return HttpResponse('<h1>Select either group only or university only</h1>') 
-        
-    context = {
-        
-        # 'Users': people_report_filter(request, searchPeopleResult(request)).count(),
-        'unis': University.objects.all(),
-        'groups': Group.objects.all(),
-        'type': PaperType.objects.all(), 
-        'selected_startdate': startdates,
-        'selected_enddate': enddates,
-        'selected_university': universities,
-        'selected_group': group
-    }    
+   
+    context = reports_context(request)
+    print(context)
     return render(request, 'reports.html', context)
-##needs work
-def generate_pdf(request):
-    
-  
-    template_path = 'reports.html'
 
+
+def reports_context(request):
     startdate_present = False
     enddate_present = False
     group_present = False
@@ -658,12 +630,17 @@ def generate_pdf(request):
 
     startdate = '2000-01-01'
     enddate = str(date.today())  
+    group = ''
+    university = ''
 
 
     context = {
         
         'startdate': startdate,
-        'enddate': enddate
+        'enddate': enddate,
+        'unis': University.objects.all(),
+        'groups': Group.objects.all(),
+        'type': PaperType.objects.all(),
    
     }
     
@@ -737,7 +714,6 @@ def generate_pdf(request):
         elif startdate_present ==False and enddate_present ==True:
             context['enddate'] = enddate
         context['total_number_of_users_in_group'] = User.objects.filter(date_joined__range = [startdate, enddate],  group__name__contains = group).count()
-        context['total_number_of_publications'] = Paper.objects.filter(created__range = [startdate, enddate], group__name__contains = group).count()
 
         group_publications_dict = {}
         group_masters_dict = {}
@@ -745,11 +721,11 @@ def generate_pdf(request):
         group_researchers_dict = {}
         group_graduates_dict = {}
 
-        group_publications_dict[group.name] =  Paper.objects.filter(group__name__contains = group, created__range = [startdate, enddate]).count()
-        group_masters_dict[group.name] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'masters').count()
-        group_phd_dict[group.name] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'phd').count()
-        group_researchers_dict[group.name] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'Researcher').count()
-        group_graduates_dict[group.name] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'graduate').count()
+        group_publications_dict[group] =  Paper.objects.filter(group__name__contains = group, created__range = [startdate, enddate]).count()
+        group_masters_dict[group] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'masters').count()
+        group_phd_dict[group] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'phd').count()
+        group_researchers_dict[group] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'Researcher').count()
+        group_graduates_dict[group] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'graduate').count()
 
         context['group_publications_dict'] = (str(group_publications_dict).replace("{","").replace("}", "")).replace(',', '\n')
         context['group_masters_dict'] = (str(group_masters_dict).replace("{","").replace("}", "")).replace(',', '\n')
@@ -797,9 +773,24 @@ def generate_pdf(request):
         context['each_group_researchers_dict'] = (str(each_group_researchers_dict).replace("{","").replace("}", "")).replace(',', '\n')
         context['each_group_graduates_dict'] = (str(each_group_graduates_dict).replace("{","").replace("}", "")).replace(',', '\n')
      
+    context['selected_group'] = group
+    context['selected_university'] = university
+    return context
+##needs work
+def generate_pdf(request):
+    
+  
+    template_path = 'reports.html'
+
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'filename="report.pdf"'
+    
+    context = reports_context(request)
+    print('request start')
+    print(request.GET)
+    print('context strt')
+    print(context)
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)
