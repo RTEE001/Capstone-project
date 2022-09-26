@@ -77,7 +77,7 @@ style="width: 100px; height: 100px;">
             <ul class="dropdown-menu">
 		{% if user.is_authenticated %}
 		<li><a class="dropdown-item" href="{% url 'dashboard' %}">Dashboard</a></li>
-              <li><a class="dropdown-item" href="{% url 'addUni' %}">logout</a></li>
+              <li><a class="dropdown-item" href="{% url 'loggedout' %}">logout</a></li>
 		
 		{% else %}
 

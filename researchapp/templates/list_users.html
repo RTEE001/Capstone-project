@@ -47,14 +47,14 @@
     			<option {% if selectedUni == '' %} selected{% endif %} value =""> Filter by University</option>
     		
     				{% for uni in UniCategory%}
-    			<option value={{uni.Uniname}} {% if selectedUni == uni.Uniname %} selected{% endif %}  >{{uni.Uniname}}</option>
+    			<option value={{uni.name}} {% if selectedUni == uni.Uniname %} selected{% endif %}  >{{uni.name}}</option>
    			 {% endfor %}
    			 
     </select>
       <select id="category" class="form-control "name="GroupCat">
     			<option {% if selectedGroup == '' %} selected{% endif %} value =""> Filter by Group</option>
     				{% for group in groups%}
-    			<option value={{group.Gname}} {% if selectedGroup == group.Gname %} selected{% endif %}>{{group.Gname}}</option>
+    			<option value={{group.name}} {% if selectedGroup == group.name %} selected{% endif %}>{{group.name}}</option>
    			 {% endfor %}
     </select>
     	   <select id="category" class="form-control "name="RoleCat">
@@ -66,12 +66,13 @@
     	
                      <button type="submit" class="btn btn-primary">Search</button>
                      </form>
+                     {% if users %}
                     <div class="table-responsive">
                         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                             <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Username</th>
+                                <th>Name</th>
                                 <th>User Role</th>
                                 <th>Email</th>
                                 <th>View</th>
@@ -82,7 +83,7 @@
                             </thead>
                             <tbody>
 			
-                        {% if users %}
+                        
                             {% for user in users %}
                             
                            
@@ -90,7 +91,7 @@
                             	
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
-                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.first_name }} {{user.last_name}}</td>
                                     <td>{% if user.is_publisher == True %}
                                       <p>Publisher</p>
                                     {% elif user.is_admin == True %}
@@ -101,7 +102,7 @@
                                     </td>
                                     <td>{{ user.email }}</td>
                                     <td>
-                <a href="{% url 'alvuser' user.pk  %}"><button type="button" class="btn btn-primary"> View</button></a>
+                <a href="{% url 'avprofile' user.pk %}"><button type="button" class="btn btn-primary"> View</button></a>
                  </td>
                 <td>
                 <a href="{% url 'aeuser' user.pk %}"><button type="button" class="btn btn-warning"> Edit</button></a>
@@ -112,6 +113,8 @@
                             
                              
                             {% endfor %}
+                            {% else %}
+                            <p> No results </p>
                         {% endif %}
                             </tbody>
                         </table>

@@ -1,0 +1,23 @@
+{% load static %}
+<! DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewpoint" content="width=device-width, initial-scale=1.0" />
+    <title>PDF output</title>
+    <style>
+      @page {
+        size: "A4";
+        margin: 2.5cm 1.5cm 3.5cm 1.5cm;
+      }
+    </style>
+  </head>
+  <body>
+    <img src="static/media/logo.svg" alt="Logo" />
+
+    <p>number of groups</p>
+    {%if type%} {{count}} {% else%}
+    <p>0</p>
+    {% endif%}
+  </body>
+</html>
