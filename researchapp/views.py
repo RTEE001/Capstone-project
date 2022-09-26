@@ -11,9 +11,7 @@ from .forms import ContactForm, UserForm
 from django.http import HttpResponse
 import re
 from django.db.models import Q
-
 from django.utils import timezone
-
 from .forms import UploadForm, UserForm, GroupForm
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -44,6 +42,37 @@ class AEditUser(generic.UpdateView):
         context['user'] = user_id
 
         return context
+
+    def get_form_kwargs(self):
+        """ Passes the request object to the form class.
+            This is necessary to only display members that belong to a given user"""
+        
+        kwargs = super(AEditUser, self).get_form_kwargs()
+        kwargs['request'] = self
+        
+        
+        return kwargs
+
+class EditPaper(UpdateView):
+    model = Paper
+    form_class = UploadForm
+    template_name ='upload.html'
+    success_url = reverse_lazy('home')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Role'] = getRole(self.request)
+        return context
+
+    def get_form_kwargs(self):
+        """ Passes the request object to the form class.
+         This is necessary to only display members that belong to a given user"""
+        
+        kwargs = super(upload_paper, self).get_form_kwargs()
+        kwargs['request'] = self.request.user
+
+
+
 class AEditGroup(UpdateView): 
     model = Group
     form_class = GroupForm
@@ -128,18 +157,36 @@ def signin(request):
     return render(request, 'signin.html')
 
 
-def upload_paper(request):
- 
-    if request.method == 'POST':
-        form = UploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            messages.info(request, 'publication uploaded successfully')
-            return render(request,'home.html')
-        else:  
-            messages.info(request, 'peer review is missing')
-    form = UploadForm()
-    return render(request, 'upload.html', {'form': form})
+class upload_paper(CreateView):
+    model = Paper
+    form_class = UploadForm
+    template_name ='upload.html'
+    success_url = reverse_lazy('home')
+    def get_context_data(self, **kwargs):
+        
+        context = super().get_context_data(**kwargs)
+        context['Role'] = getRole(self.request)
+        author_id = self.kwargs['pk']
+        query=""
+        query_string= User.objects.all().filter(id=author_id)
+        for i in query_string:
+            query+=str(i.first_name)+" "+str(i.last_name)
+            
+        entry_query = get_query(query, ['author', 'co_author'])
+        a=Paper.objects.all().filter(entry_query)
+        context['papers'] = a
+        
+        return context
+    def get_form_kwargs(self):
+        """ Passes the request object to the form class.
+         This is necessary to only display members that belong to a given user"""
+        
+        kwargs = super(upload_paper, self).get_form_kwargs()
+        kwargs['request'] = self.request.user
+        
+       
+        return kwargs
+
 
 
 

@@ -33,14 +33,14 @@
     			<option {% if selectedUni == '' %} selected{% endif %} value =""> Filter by University</option>
     		
     				{% for uni in UniCategory%}
-    			<option value={{uni.Uniname}} {% if selectedUni == uni.Uniname %} selected{% endif %}  >{{uni.Uniname}}</option>
+    			<option value={{uni.name}} {% if selectedUni == uni.name %} selected{% endif %}  >{{uni.name}}</option>
    			 {% endfor %}
    			 
     </select>
       <select id="category" class="form-control "name="GroupCat">
     			<option {% if selectedGroup == '' %} selected{% endif %} value =""> Filter by Group</option>
     				{% for group in groups%}
-    			<option value={{group.Gname}} {% if selectedGroup == group.Gname %} selected{% endif %}>{{group.Gname}}</option>
+    			<option value={{group.name}} {% if selectedGroup == group.name %} selected{% endif %}>{{group.name}}</option>
    			 {% endfor %}
     </select>
     	   <select id="category" class="form-control "name="RoleCat">

@@ -18,20 +18,20 @@
                     Details Of User
                 </div>
                 <div class="card-body">
-                    {% for message in messages %}
+                   
                         <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert">
-                            {{ message }}
+                           {{form.errors}} 
                         </div>
-                    {% endfor %}
+                   
 
     <div class="row">
         <div class="col-12">
-            <form method="post" style="background-color: white">
+            <form method="post" style="background-color: white" enctype="multipart/form-data">
                 {% csrf_token %}
                 {% for field in form %}
                     <div class="form-group">
                     
-                   
+                  
                         {{ field.label_tag }}
                         {{ field }}
                     

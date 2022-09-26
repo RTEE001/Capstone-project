@@ -29,7 +29,7 @@ urlpatterns = [
     path('papers_pdf/', views.generate_pdf, name = 'paperpdf'),
     path('search_paper/', views.search_paper, name="search_paper"),
 
-    path('upload/', views.upload_paper, name = 'upload'),
+    path('upload/', views.upload_paper.as_view(), name = 'upload'),
 
     path('search/', views.search, name = 'search'),
 
@@ -58,8 +58,7 @@ urlpatterns = [
     path('manageusersearch/',views.manageUserFilter, name ='manageusersearch'), 
     path('addUni/', views.addUni, name= 'addUni'),
     path('addUnidetails,', views.addUnidetails, name= 'addUnidetails'),
-
-
+    path('editpaper/<int:pk>', views.EditPaper.as_view(),name='editPaper'),
     path('list_chats/', views.ListMessages.as_view(), name = 'contact_list')
 
 ]
