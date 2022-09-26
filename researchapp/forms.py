@@ -53,15 +53,17 @@ class UserForm(forms.ModelForm):
 
 
 class UploadForm(forms.ModelForm):
-    
+    published_by=forms.ModelChoiceField(queryset=User.objects.all(), required=False)
+    peerReview = forms.FileField(required=False)
     class Meta:
         model = Paper
-        fields = ('title', 'author','co_author','author_username','co_author_username','description','category','group','publication','peerReview','published_by')
+        fields = ('title', 'author','co_author','description','category','group','publication','peerReview','published_by')
     
     def __init__(self,request,*args, **kwargs):
         super(UploadForm, self).__init__(*args, **kwargs)
+        self.fields['published_by'].widget.attrs['disabled']=True
         self.user = request
-        super().__init__(*args, **kwargs)
+        
      
         
     def clean(self):

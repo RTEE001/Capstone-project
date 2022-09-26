@@ -210,7 +210,7 @@
 
 {% endif %}
        					<li>
-       						<a href="#"><i class="fas fa-book"></i> Manage Publications</a>
+       						<a href="{% url 'managepublications' %}"><i class="fas fa-book"></i> Manage Publications</a>
        					</li>
  {% if Role == 'UniAdmin' or Role == 'CAIRAdmin' or Role == 'Groupleader'%}
                 <li>
