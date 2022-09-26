@@ -1,0 +1,123 @@
+{% load static%}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+
+    <p style="text-align:center;">
+      <a href="{% url 'home' %}">
+        <img = src = "{% static 'media/logo.svg'%}" alt="Logo" style="width: 100px; height: 100px;">
+   
+     </a>
+    
+    
+    </p>
+    
+    
+     </head>
+     <body>
+     {% csrf_token %}
+       <nav class="navbar">
+    
+         <!-- NAVIGATION MENU -->
+         <ul class="nav-links">
+    
+    
+           <!-- NAVIGATION MENUS -->
+           <div class="menu">
+             <li><a href="{% url 'home' %}" >Home</a></li>
+              <li><a href="{% url 'research' %}">Research Publications</a></li>
+               <li><a href="{% url 'people' %}">People</a></li>
+             <li><a href="{% url 'about' %}">About</a></li>
+             <li><a href="{% url 'contact' %}">Contact</a></li>
+             
+             <li><a href="{% url 'contact' %}" >logout</a></li>
+             <h3>you are {{ username }}</h3>
+   
+    </ul>
+    
+    
+              
+    
+       </nav>
+    
+   
+    
+           </div>
+    
+    
+    <div class="slideshow-container">
+    
+    <div class="mySlides fade">
+    
+      <img = src = "{% static 'media/screenshot1.png'%}" style="width: 100%">
+    
+    
+    </div>
+    
+    <div class="mySlides fade">
+      <div class="numbertext">2 / 3</div>
+      <img = src = "{% static 'media/screenshot2.png'%}" style="width: 100%">
+    
+    
+    </div>
+    
+    <div class="mySlides fade">
+      <div class="numbertext">3 / 3</div>
+      <img = src = "{% static 'media/screenshot3.png'%}" style="width: 100%">
+    
+    
+    </div>
+    
+    <a class="prev" onclick="plusSlides(-1)">❮</a>
+    <a class="next" onclick="plusSlides(1)">❯</a>
+    
+    </div>
+    <br>
+    
+    <div style="text-align:center">
+      <span class="dot" onclick="currentSlide(1)"></span>
+      <span class="dot" onclick="currentSlide(2)"></span>
+      <span class="dot" onclick="currentSlide(3)"></span>
+    </div>
+    
+    <script>
+    let slideIndex = 1;
+    showSlides(slideIndex);
+    
+    function plusSlides(n) {
+      showSlides(slideIndex += n);
+    }
+    
+    function currentSlide(n) {
+      showSlides(slideIndex = n);
+    }
+    
+    function showSlides(n) {
+      let i;
+      let slides = document.getElementsByClassName("mySlides");
+      let dots = document.getElementsByClassName("dot");
+      if (n > slides.length) {slideIndex = 1}
+      if (n < 1) {slideIndex = slides.length}
+      for (i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
+      }
+      for (i = 0; i < dots.length; i++) {
+        dots[i].className = dots[i].className.replace(" active", "");
+      }
+      slides[slideIndex-1].style.display = "block";
+      dots[slideIndex-1].className += " active";
+    }
+    </script>
+    
+    </body>
+    
+     <h1 style="text-align:center" >Research Groups</h1>
+    
+    
+     </body>
+    </html>
+    
