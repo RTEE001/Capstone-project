@@ -19,7 +19,7 @@
                    
                 </div>
                 <p style="text-align:center;">
-                 <img src="{{object.uni.image.url }}"
+                 <img src="{{object.university.image.url }}"
 	alt="Logo"
 style="width: 100px; height: 100px;">
                 <div class="card-body">
@@ -35,7 +35,7 @@ style="width: 100px; height: 100px;">
                 {% csrf_token %}
                 {% for field in form %}
                     <div class="form-group">
-                        Group Name:
+                        {{field.label_tag}}
                         {{ field }}
                     </div>
                 {% endfor %}

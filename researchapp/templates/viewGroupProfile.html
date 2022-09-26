@@ -46,20 +46,20 @@
                     {% endfor %}
                     <img class="img-fluid" alt="100%x280"
 
-                                             src= {% if object.uni.image %}{{ object.uni.image.url }}{% else %} {% static 'media/logo.svg' %}{% endif %} style="width:100px;height:100px">
+                                             src= {% if object.university.image %}{{ object.university.image.url }}{% else %} {% static 'media/logo.svg' %}{% endif %} style="width:100px;height:100px">
 
  <div class="row">
         <div class="col-12">
             <ul class="list-group">
              
               						
-              <li class="list-group-item"><strong>Group Name:</strong>{{ object.Gname}}</li>
+              <li class="list-group-item"><strong>Group Name: </strong>{{ object.name}}</li>
               						
-              						{% if object.uni.Uniname %}
+              						{% if object.university.name %}
               						
-              <li class="list-group-item"><strong>Institution :</strong>{{ object.uni.Uniname}}</li>
+              <li class="list-group-item"><strong>Institution: </strong>{{ object.university.name}}</li>
               						{% endif %}
-              <li class="list-group-item"><strong>about :</strong></li>
+              <li class="list-group-item"><strong>about: {{object.description}}</strong></li>
             </ul>
         </div>
     </div>

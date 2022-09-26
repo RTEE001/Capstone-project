@@ -90,7 +90,7 @@ a {
     <select id="category" class="form-control "name="UniCat" required>
     <option selected> choose Group...</option>
     {% for uni in UniCategory%}
-    <option value={{uni.Uniname}}>{{uni.Uniname}}</option>
+    <option value={{uni.name}}>{{uni.name}}</option>
     {% endfor %}
     </select>
     <hr>
