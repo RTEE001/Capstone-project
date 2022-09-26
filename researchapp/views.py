@@ -66,7 +66,24 @@ class AEditGroup(UpdateView):
         context['Role'] = getRole(self.request)
         return context
 
-    
+class EditPaper(UpdateView):
+    model = Paper
+    form_class = UploadForm
+    template_name ='upload.html'
+    success_url = reverse_lazy('home')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Role'] = getRole(self.request)
+        return context
+
+    def get_form_kwargs(self):
+        """ Passes the request object to the form class.
+         This is necessary to only display members that belong to a given user"""
+        
+        kwargs = super(upload_paper, self).get_form_kwargs()
+        kwargs['request'] = self.request.user
+
 class ListUserView(generic.ListView):
     model = User
     template_name = 'list_users.html'
@@ -139,20 +156,36 @@ def signin(request):
     return render(request, 'signin.html')
 
 
-def upload_paper(request):
- 
-    if request.method == 'POST':
-        form = UploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            messages.info(request, 'publication uploaded successfully')
-            return render(request,'home.html')
-        else:  
-            messages.info(request, 'peer review is missing')
-    form = UploadForm()
-    return render(request, 'upload.html', {'form': form})
+class upload_paper(CreateView):
+    model = Paper
+    form_class = UploadForm
+    template_name ='upload.html'
+    success_url = reverse_lazy('home')
+    def get_context_data(self, **kwargs):
+        
+        context = super().get_context_data(**kwargs)
+        context['Role'] = getRole(self.request)
+        author_id = self.kwargs['pk']
+        query=""
+        query_string= User.objects.all().filter(id=author_id)
+        for i in query_string:
+            query+=str(i.first_name)+" "+str(i.last_name)
+            
+        entry_query = get_query(query, ['author', 'co_author'])
+        a=Paper.objects.all().filter(entry_query)
+        context['papers'] = a
+        
+        return context
 
-
+    def get_form_kwargs(self):
+        """ Passes the request object to the form class.
+         This is necessary to only display members that belong to a given user"""
+        
+        kwargs = super(upload_paper, self).get_form_kwargs()
+        kwargs['request'] = self.request.user
+        
+       
+        return kwargs
 
 def login1(request):
     if request.method == 'POST':
@@ -535,54 +568,49 @@ class AViewGroupProfile(LoginRequiredMixin,DetailView):
         context['paper1'] =  a     
         return context
 
+def filter_by_date_type_group(request, paper_list):
+   
+    if 'date' in request.GET:
+        if request.GET['date'] !='':
+            paper_list = paper_list.filter(created__icontains = request.GET['date'])
+    if 'type' in request.GET:
+        if request.GET['type'] !='':
+            paper_list = paper_list.filter(category__name__icontains = request.GET['type'])
+    if 'group' in request.GET:
+        if request.GET['type'] !='':
+            paper_list = paper_list.filter(group__name__icontains = request.GET['group'])
+
+    return paper_list
+
 
 def filter_papers(request):
-    papers = Paper.objects.all()
-    groups = Group.objects.all()
-    unis = University.objects.all()
-    type = PaperType.objects.all()
+    searches = ''
+    dates= ''
+    types = ''
+    groups = ''
+
+    if 'search' in request.GET:
+        searches = request.GET['search']
+    if 'date' in request.GET:
+        dates = request.GET['date']
+    if 'type' in request.GET:
+        types = request.GET['type']
+    if 'group' in request.GET:
+        groups = request.GET['group']
+
+
     context = {
-        'papers': papers,
-        'groups': groups,
-        'type': type,
-        'unis': unis
+        'papers': filter_by_date_type_group(request, search_paper(request)),
+        'groups': Group.objects.all(),
+        'type': PaperType.objects.all(), 
+        'selected_search': searches,
+        'selected_date': dates,
+        'selected_type': types,
+        'selected_group': groups
     }
-    if request.method == 'POST':           
-        startdate = request.POST.get('startdate')
-        enddate = request.POST.get('enddate')
-        type = request.POST.get('type')
-        group = request.POST.get('GroupCat')
-        if startdate == '' and enddate == '' and type == '':
-            print('path 1')
-            return render(request, 'paper.html', context)
-        elif (startdate == '' or enddate == '') and type != '':
-            print('path 2')
-            filter = Paper.objects.filter(category__name__contains = type)
-            context ={
-                'papers':filter
-            }
-            print(filter)
-            return render(request, 'paper.html', context)
-        elif startdate != '' and enddate != '' and type == '':
-            print('path 3')
-            filter = Paper.objects.filter(created__range = [startdate, enddate])
-            print(filter)
-            context ={
-                'papers':filter
-            }
-            return render(request, 'paper.html', context)                 
-        else: 
-            print('path 4')
-            filter = Paper.objects.filter(created__range = [startdate, enddate], category__name__contains = type)
-            print(filter)
-            context = {     
-                'papers':filter
-        
-            }
-            return render(request, 'paper.html',context)     
-    else:
-       
-        return render(request, 'paper.html', context)
+    
+    return render(request, 'paper.html', context)
+
 #
 
 
