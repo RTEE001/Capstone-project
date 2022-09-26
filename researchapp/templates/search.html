@@ -1,0 +1,46 @@
+{%load static%}
+
+<!DOCTYPE html>
+
+<form method = 'GET'>
+    {% csrf_token %}
+    <label for="search">search</label>
+    <input type="text" id="search" name="search">
+    <input type = 'submit' name = 'Search'/>
+
+    <table border = '1'>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Co_author</th>
+            <th>Description</th>
+            <th>View</th>
+
+
+           
+        </tr>
+  {% for paper in papers%}
+</tr>
+    <td>{{paper.title}}  </td>
+    <td>{{paper.author}} </td>   
+    <td>{{paper.co_author}} </td>
+    <td>{{paper.description}}  </td> 
+    <td> <a href="{{ paper.pdf.url }}"> download </a></td>
+</tr>
+  {% endfor%} 
+</table>
+  <table border = '1'>
+    <tr>
+        <th>name</th>
+        <th>surname</th>
+        <th>username</th>      
+    </tr>
+  {% for person in people%}
+</tr>
+    <th>{{person.first_name}}</th>    
+    <th>{{person.last_name}} </th>  
+    <th>{{person.username}}  </th>  
+   
+</tr>
+  {% endfor%}
+</table>
