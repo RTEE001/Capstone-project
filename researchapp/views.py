@@ -579,16 +579,13 @@ def reports(request):
     if 'enddate' in request.GET:
         enddates = request.GET['enddate']
     if 'group' in request.GET:
-        group = request.GET['type']
+        group = request.GET['group']
     if 'university' in request.GET:
         universities = request.GET['university']
 
     if group != '' and universities !='':
-        HttpResponse('<h1>Select either group only or university only</h1>')
+        return HttpResponse('<h1>Select either group only or university only</h1>') 
         
-        return render(request, 'reports.html')
-        
-
     context = {
         
         # 'Users': people_report_filter(request, searchPeopleResult(request)).count(),
@@ -599,8 +596,7 @@ def reports(request):
         'selected_enddate': enddates,
         'selected_university': universities,
         'selected_group': group
-    }
-    
+    }    
     return render(request, 'reports.html', context)
 ##needs work
 def generate_pdf(request):
@@ -682,10 +678,15 @@ def generate_pdf(request):
         context['each_university_researchers_dict'] = (str(each_university_researchers_dict).replace("{","").replace("}", "")).replace(',', '\n')
         context['each_university_graduates_dict'] = (str(each_university_graduates_dict).replace("{","").replace("}", "")).replace(',', '\n')  
 
-    elif startdate_present == True and enddate_present ==True and group_present == True and university_present == False:
-        
-        context['startdate'] = startdate
-        context['enddate'] = enddate
+    elif group_present == True and university_present == False:
+  
+        if startdate_present == True and enddate_present ==False:
+            context['startdate'] = startdate
+        elif startdate_present == True and enddate_present == True:
+            context['startdate'] = startdate
+            context['enddate'] = enddate
+        elif startdate_present ==False and enddate_present ==True:
+            context['enddate'] = enddate
         context['total_number_of_users_in_group'] = User.objects.filter(date_joined__range = [startdate, enddate],  group__name__contains = group).count()
         context['total_number_of_publications'] = Paper.objects.filter(created__range = [startdate, enddate], group__name__contains = group).count()
 
@@ -707,9 +708,14 @@ def generate_pdf(request):
         context['group_researchers_dict'] = (str(group_researchers_dict).replace("{","").replace("}", "")).replace(',', '\n')
         context['group_graduates_dict'] = (str(group_graduates_dict).replace("{","").replace("}", "")).replace(',', '\n')
 
-    elif startdate_present == True and enddate_present ==True and group_present == False and university_present == True:
-        context['startdate'] = startdate
-        context['enddate'] = enddate
+    elif  group_present == False and university_present == True:
+        if startdate_present == True and enddate_present ==False:
+            context['startdate'] = startdate
+        elif startdate_present == True and enddate_present == True:
+            context['startdate'] = startdate
+            context['enddate'] = enddate
+        elif startdate_present ==False and enddate_present ==True:
+            context['enddate'] = enddate
         context['total_number_of_users_in_uni'] = User.objects.filter(date_joined__range = [startdate, enddate], university__name__contains = university ).count()
        
         context['total_number_of_groups'] = Group.objects.filter(created__range = [startdate, enddate], university__name__contains = university).count()
