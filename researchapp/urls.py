@@ -59,6 +59,7 @@ urlpatterns = [
     path('addUni/', views.addUni, name= 'addUni'),
     path('addUnidetails,', views.addUnidetails, name= 'addUnidetails'),
     path('editpaper/<int:pk>', views.EditPaper.as_view(),name='editPaper'),
-    path('list_chats/', views.ListMessages.as_view(), name = 'contact_list')
-
+    path('list_chats/', views.ListMessages.as_view(), name = 'contact_list'),
+    path('managepublications/', views.managePublications, name ='managepublications'),
+    
 ]

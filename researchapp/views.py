@@ -22,12 +22,56 @@ from xhtml2pdf import pisa
 
 from datetime import date
 
+
+def managePublications(request):
+    searches = ''
+    dates= ''
+    types = ''
+    group = ''
+
+    if 'search' in request.GET:
+        searches = request.GET['search']
+    if 'date' in request.GET:
+        dates = request.GET['date']
+    if 'type' in request.GET:
+        types = request.GET['type']
+    if 'group' in request.GET:
+        group = request.GET['group']
+        print(request.GET['group']+"sjhbgdvhfb")
+    if getRole(request)=="CAIRAdmin":
+        displayPapers=filter_by_date_type_group(request, search_paper(request))
+        groups = Group.objects.all()
+    elif  getRole(request)=="UniAdmin":
+        displayPapers=filter_by_date_type_group(request, search_paper(request)).filter(group__university__name__iexact=request.user.university)
+        groups = Group.objects.all().filter(university__name__iexact=request.user.university)
+    elif getRole(request)=="GroupAdmin":
+        displayPapers=filter_by_date_type_group(request, search_paper(request)).filter(group__name__iexact=request.user.university)
+        groups = Group.objects.all().filter(name__iexact=request.user.group)
+    else :
+        entry_query = get_query(str(request.user.first_name)+' '+str(request.user.last_name), ['author', 'co_author'])
+
+        displayPapers=filter_by_date_type_group(request, search_paper(request)).filter(entry_query)
+        groups = Group.objects.all().filter(name__iexact=request.user.group)
+    
+
+    context = {
+        'papers': displayPapers,
+        'groups': groups,
+        'Role' : getRole(request),
+        'type': PaperType.objects.all(), 
+        'selected_search': searches,
+        'selected_date': dates,
+        'selected_type': types,
+        'selected_group': group
+    }
+    return render(request, 'manageownpapers.html', context )
+
 class ALViewUser(DetailView):
     model = User
     template_name='user_detail.html'
 
 
-class AEditUser(generic.UpdateView): 
+class AEditUser(generic.UpdateView):
     model = User
     form_class = UserForm
   
@@ -53,11 +97,11 @@ class AEditUser(generic.UpdateView):
         
         return kwargs
 
-class EditPaper(UpdateView):
+class EditPaper(generic.UpdateView):
     model = Paper
     form_class = UploadForm
     template_name ='upload.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('managepublications')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -68,8 +112,9 @@ class EditPaper(UpdateView):
         """ Passes the request object to the form class.
          This is necessary to only display members that belong to a given user"""
         
-        kwargs = super(upload_paper, self).get_form_kwargs()
+        kwargs = super(EditPaper, self).get_form_kwargs()
         kwargs['request'] = self.request.user
+        return kwargs
 
 
 
@@ -140,11 +185,10 @@ def people(request):
     return render(request,'people.html', context)
 
 def research(request):
-    if login1(request):
+   
         
-        return redirect('home')
-    else:
-        return render(request,'research.html')
+       
+    return render(request,'research.html')
 
   
 
@@ -161,21 +205,26 @@ class upload_paper(CreateView):
     model = Paper
     form_class = UploadForm
     template_name ='upload.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('managepublications')
     def get_context_data(self, **kwargs):
         
         context = super().get_context_data(**kwargs)
         context['Role'] = getRole(self.request)
-        author_id = self.kwargs['pk']
+        
         query=""
-        query_string= User.objects.all().filter(id=author_id)
+        query_string= User.objects.all().filter(id=self.request.user.id)
+        
         for i in query_string:
             query+=str(i.first_name)+" "+str(i.last_name)
-            
-        entry_query = get_query(query, ['author', 'co_author'])
+        entry_query=""
+        if query == " ":
+            entry_query = get_query("&None&", ['author', 'co_author'])
+        else:
+            entry_query = get_query(query, ['author', 'co_author'])
+        
         a=Paper.objects.all().filter(entry_query)
         context['papers'] = a
-        
+    
         return context
     def get_form_kwargs(self):
         """ Passes the request object to the form class.
@@ -852,6 +901,13 @@ def search_paper(request):
     found_entries = None
     if ('q' in request.GET) and request.GET['q'].strip():
         query_string = request.GET['q']
+
+        entry_query = get_query(query_string, ['title', 'description','author'])
+        
+        paper_list= Paper.objects.filter(entry_query)
+        return paper_list
+    elif ('search' in request.GET) and request.GET['search'].strip():
+        query_string = request.GET['search']
 
         entry_query = get_query(query_string, ['title', 'description','author'])
 

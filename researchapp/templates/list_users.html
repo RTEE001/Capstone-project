@@ -106,9 +106,17 @@
                  </td>
                 <td>
                 <a href="{% url 'aeuser' user.pk %}"><button type="button" class="btn btn-warning"> Edit</button></a>
+             
         </td>
         <td>
-          <a href=""><button type="button" class="btn btn-danger"> Delete</button></a></td>
+          <form method="GET" action="{% url 'change_password' %}">
+            {% csrf_token %}
+  
+    <input type="hidden" name="key" value="{{user.pk}}" />
+    
+    <button type="submit" name="ID" class="btn btn-primary">Deactivate</button>
+  
+</form></a></td>
                                 </tr>
                             
                              
