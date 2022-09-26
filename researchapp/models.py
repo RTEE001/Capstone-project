@@ -62,3 +62,13 @@ class Paper(models.Model):
     created = models.DateField(auto_now_add=True)
     def __str__(self):
         return self.title
+
+
+class Contact(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100)
+    message = models.CharField(max_length=250)
+    date_posted = models.DateTimeField(auto_now = True)
+
+    def __str__(self):
+        return self.message

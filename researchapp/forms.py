@@ -3,10 +3,9 @@ from django.contrib.auth.models import User
 
 from django.forms import ModelForm
 from django import forms
-from researchapp.models import Group, Paper
+from researchapp.models import Contact, Group, Paper
 from django.core.exceptions import ValidationError     
-
-
+from datetime import date
 
 class GroupForm(forms.ModelForm):
     class Meta:
@@ -41,5 +40,7 @@ class UploadForm(forms.ModelForm):
         else:
             return data
 
-
-
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = Contact
+        fields = ('__all__')

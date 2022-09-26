@@ -18,6 +18,12 @@ urlpatterns = [
     path('avprofle/<int:pk>', views.AViewProfile.as_view(), name='avprofile'),
     path('avGprofle/<int:pk>', views.AViewGroupProfile.as_view(), name='avGprofile'),
 
+
+
+    path('contact_form/', views.CreateContactUs.as_view(), name = 'contact_form'),
+
+
+
     path('papers/', views.filter_papers, name = 'papers'),
     path('reports/', views.reports, name = 'reports'),
     path('papers_pdf/', views.generate_pdf, name = 'paperpdf'),
@@ -51,7 +57,9 @@ urlpatterns = [
     path('change_password', views.passwordChange, name='change_password'),
     path('manageusersearch/',views.manageUserFilter, name ='manageusersearch'), 
     path('addUni/', views.addUni, name= 'addUni'),
-    path('addUnidetails,', views.addUnidetails, name= 'addUnidetails')
+    path('addUnidetails,', views.addUnidetails, name= 'addUnidetails'),
 
+
+    path('list_chats/', views.ListMessages.as_view(), name = 'contact_list')
 
 ]

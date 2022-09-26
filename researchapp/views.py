@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Paper, Role, User, Group, University, StudentRole, PaperType
+from .models import Contact, Paper, Role, User, Group, University, StudentRole, PaperType
 from django.utils.text import slugify
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.messages.views import SuccessMessageMixin
@@ -7,12 +7,12 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.views import generic
 from django.views.generic import  DetailView, UpdateView, CreateView, DeleteView, ListView
-from .forms import UserForm
+from .forms import ContactForm, UserForm
 from django.http import HttpResponse
 import re
 from django.db.models import Q
 
-
+from django.utils import timezone
 
 from .forms import UploadForm, UserForm, GroupForm
 from django.contrib.auth.hashers import make_password
@@ -600,7 +600,8 @@ def reports(request):
     return render(request, 'reports.html', context)
 ##needs work
 def generate_pdf(request):
- 
+    
+  
     template_path = 'reports.html'
 
     startdate_present = False
@@ -629,6 +630,7 @@ def generate_pdf(request):
             enddate = request.GET['enddate']
       
     if 'group' in request.GET:
+       
         if request.GET['group'] != '':
             group_present = True
             group = request.GET['group']          
@@ -664,12 +666,12 @@ def generate_pdf(request):
 
         for each_uni in all_unis:
             
-            each_university_users_dict[f'{each_uni.name}'] = User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate]).count()
-            each_university_publications_dict[f'{each_uni.name}']= Paper.objects.filter(group__university__name__contains = each_uni, created__range = [startdate, enddate]).count()
-            each_university_masters_dict[f'{each_uni.name}']= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'masters').count()
-            each_university_phd_dict[f'{each_uni.name}']= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'phd').count()
-            each_university_researchers_dict[f'{each_uni.name}']= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'Researcher').count()   
-            each_university_graduates_dict[f'{each_uni.name}']= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'graduate').count()            
+            each_university_users_dict[each_uni.name] = User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate]).count()
+            each_university_publications_dict[each_uni.name]= Paper.objects.filter(group__university__name__contains = each_uni, created__range = [startdate, enddate]).count()
+            each_university_masters_dict[each_uni.name]= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'masters').count()
+            each_university_phd_dict[each_uni.name]= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'phd').count()
+            each_university_researchers_dict[each_uni.name]= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'Researcher').count()   
+            each_university_graduates_dict[each_uni.name]= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'graduate').count()            
 
         context['each_university_users_dict'] = (str(each_university_users_dict).replace("{","").replace("}", "")).replace(',', '\n')
         context['each_university_publications_dict'] = (str(each_university_publications_dict).replace("{","").replace("}", "")).replace(',', '\n')
@@ -734,12 +736,12 @@ def generate_pdf(request):
 
         for each_group in all_groups_in_uni:
             
-            each_group_users_dict[f'{each_group.name}'] = User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate]).count()
-            each_group_publications_dict[f'{each_group.name}']= Paper.objects.filter(group__name__contains = each_group, created__range = [startdate, enddate]).count()
-            each_group_masters_dict[f'{each_group.name}']= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'masters').count()
-            each_group_phd_dict[f'{each_group.name}']= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'phd').count()
-            each_group_researchers_dict[f'{each_group.name}']= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'Researcher').count()   
-            each_group_graduates_dict[f'{each_group.name}']= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'graduate').count()            
+            each_group_users_dict[each_group.name] = User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate]).count()
+            each_group_publications_dict[each_group.name]= Paper.objects.filter(group__name__contains = each_group, created__range = [startdate, enddate]).count()
+            each_group_masters_dict[each_group.name]= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'masters').count()
+            each_group_phd_dict[each_group.name]= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'phd').count()
+            each_group_researchers_dict[each_group.name]= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'Researcher').count()   
+            each_group_graduates_dict[each_group.name]= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'graduate').count()            
 
         context['each_group_users_dict'] = (str(each_group_users_dict).replace("{","").replace("}", "")).replace(',', '\n')
         context['each_group_publications_dict'] = (str(each_group_publications_dict).replace("{","").replace("}", "")).replace(',', '\n')
@@ -836,3 +838,22 @@ def search(request):
             'people': display_people
             }
         return render(request, 'search.html', context)
+
+class CreateContactUs(CreateView):
+    form_class = ContactForm
+    model = Contact
+    template_name = 'contact_form.html'
+    success_url = reverse_lazy('contact_form')
+
+    def form_valid(self, form):
+        self.object = form.save(commit = False)
+        self.object.save()
+        return super().form_valid(form)
+
+
+class ListMessages(ListView):
+    model = Contact
+    template_name = 'contact_us_list.html'
+
+    def get_query_set(self):
+        return Contact.objects.filter(date_posted__lt = timezone.now()).order_by('date_posted')
