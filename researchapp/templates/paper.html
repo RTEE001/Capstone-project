@@ -10,26 +10,34 @@
         <h1> Filter papers <h1>
 
         <hr>
-      
-        <form method = 'POST'>
+
+        <form method = 'GET' action = "{% url 'papers'%}">
             {% csrf_token %}
-            <label for="dates">start date:</label>
-            <input type="date" id="date" name="startdate">
-    
-            <label for="dates">end date:</label>
-            <input type="date" id="date" name="enddate">
+
+            <label for="search"><b>search</b></label>
+            <input type="text"  name = 'search' {% if selected_search == ''%} value = '' {%else%} value = '{{selected_search}}'{% endif%} />
+
+
+            <label for="year"><b>Year</b></label>
+            <input type="text"  name = 'date'  {% if selected_date == ''%} value = '' {%else%} value = '{{selected_date}}'{% endif%}/>
      
             <label for="type"><b>type</b></label>
             <select id="type" name="type">
-            <option selected> </option>
+            <option {% if selected_type == ''%} selected {% endif%} value = ''> Select Type</option>
             {% for typ in type%} 
-            <option value={{typ.name}} >{{typ.name}}  
+            <option value={{typ.name}} {%if selected_type == typ.name%} selected {%endif%}>{{typ.name}}  
             </option>
             {% endfor %}
-     
+        </select>
 
-
- 
+            <label for="groups"><b>group</b></label>
+            <select id="type" name="group">
+                <option {% if selected_group == ''%} selected {% endif%} value = ''> Select Group</option>
+                {% for group in groups%} 
+                <option value={{group.name}} {%if selected_type == group.name%} selected {%endif%}>{{group.name}}  
+            </option>
+            {% endfor %}
+        </select>
         <input type = 'submit' name = 'Search'/>
       
         <table border = '1'>

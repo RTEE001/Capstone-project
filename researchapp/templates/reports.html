@@ -2,75 +2,102 @@
 
 <!DOCTYPE html>
 <head>
-    <title> REports </title>
+    <title> Reports </title>
 </head>
 
 <body>
     <center>
-      
-        <form mepod = 'POST' action="{% url 'paperpdf' %}">
+        <h1> Reports <h1>
+
+        <hr>
+
+        <form method = 'GET' action = "{% url 'paperpdf'%}">
             {% csrf_token %}
-         
-            <label for="group"><b>group</b></label>
-            <select id="group" name="group">
-            {% for group in groups%} 
-            <option value={{group.Gname}} >{{group.Gname}}  
+
+            <label for="startdate"><b>Startdate</b></label>
+            <input type="date"  name = 'startdate'  {% if selected_startdate == ''%} value = '' {%else%} value = '{{selected_startdate}}'{% endif%}/>
+     
+            <label for="enddate"><b>enddate</b></label>
+            <input type="date"  name = 'enddate'  {% if selected_endtdate == ''%} value = '' {%else%} value = '{{selected_enddate}}'{% endif%}/>
+
+            <label for="university"><b>university</b></label>
+            <select id="university" name="university">
+            <option {% if selected_university == ''%} selected {% endif%} value = ''> Select Uni</option>
+            {% for university in unis%} 
+            <option value={{university.name}} {%if selected_university == university.name%} selected {%endif%}>{{university.name}}  
+            </option>
+
+            {% endfor %}
+        </select>
+
+            <label for="groups"><b>group</b></label>
+            <select id="type" name="group">
+                <option {% if selected_type == ''%} selected {% endif%} value = ''> Select Group</option>
+                {% for group in groups%} 
+                <option value={{group.name}} {%if selected_type == group.name%} selected {%endif%}>{{group.name}}  
             </option>
             {% endfor %}
-
-
-            
-    
-         <label for="dates">start date</label>
-        <input type="date" id="date" name="startdate">
-
-        <label for="dates">end date</label>
-        <input type="date" id="date" name="enddate"> 
-
-
-        <label for="uni"><b>uni</b></label>
-        <select id="uni" name="uni">
-        {% for uni in groups%} 
-        <option value={{uni.Uniname}} >{{uni.Uniname}}  
-        </option>
-        {% endfor %} 
-        
-
+        </select>
         <input type = 'submit' name = 'Search'/>
-        </form>
-        <h1> reports <h1>
-        </center>
-        
-            <p>Date Range: 
-                {%if startdate and enddate%} 
-                {{startdate}} - {{enddate}}
-                {%else%} All time{%endif%}
-            </p>
+      
 
-            <p>Group:
-                {%if group%} 
-                {{group}}
-                {%else%} All Groups{%endif%}
-            </p>
+        {% if messages%} {% for message in messages%} {{message}} {%endfor%} 
+        {%else%}
+        <p>Date Range:
+            {{startdate}} - {{enddate}}
+        </p>
 
-            <p>University:
-                {%if university%} 
-                {{university}}
-                {%else%} All Universities{%endif%}
-            </p>
+        <p>
+            Total number of users:
+            {{total_number_of_users}}
+        </p>
 
-            
-            <p>Total number of papers:</p>
-            <p>Total number of group papers:</p>
-            <p>Total number of University papers:</p>
-            <p>Total number of papers per group:</p>
-            <p>Total number of papers per group:</p>
-            <p>Total number of masters students:</p>
-            <p>Total number of phd students:</p>
-            <p>Total number of students who graduated:</p>
+        <p>
+            Total number of universities:
+            {{total_number_of_universities}}
+        </p>
 
 
-    
-   
+        <p>
+            Total number of groups:
+            {{total_number_of_groups}}
+        </p>
+
+        <p>
+            Total number of publications:
+            {{total_number_of_publications}}
+        </p>
+
+        <p> users per uni:
+            <p></p>
+            {{ each_university_users_dict|linebreaksbr }}
+        </p>
+
+        <p>publications per uni:
+            <p></p>
+            {{ each_university_publications_dict|linebreaksbr }}
+        </p>
+
+        <p> masters students per uni:
+            <p></p>
+            {{ each_university_masters_dict|linebreaksbr }}
+        </p>
+
+        <p> phd students per uni:
+            <p></p>
+            {{ each_university_phd_dict|linebreaksbr }}
+        </p>
+
+        <p> researchers per uni:
+            <p></p>
+            {{ each_university_researchers_dict|linebreaksbr }}
+        </p>
+
+        <p> graduates per uni:
+            <p></p>
+            {{ each_university_graduates_dict|linebreaksbr }}
+        </p>
+          {%endif%} 
+    </center>
 </body>
 <html>

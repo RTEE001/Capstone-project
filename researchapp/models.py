@@ -18,6 +18,7 @@ class Role(models.Model):
 class University(models.Model):
     name = models.CharField(max_length=100)
     image = models.ImageField(upload_to='images',default=None, blank=True ,null=True)
+    created = models.DateField(auto_now_add=True)
     def __str__(self):
         return self.name
 
@@ -26,6 +27,7 @@ class Group(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=100)
     university = models.ForeignKey(University, on_delete=models.CASCADE, default=None, null=TRUE)
+    created = models.DateField(auto_now_add=True)
     def __str__(self):
         return self.name
 

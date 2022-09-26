@@ -364,3 +364,69 @@ def generate_pdf(request):
     else:
     
         return render(request, 'reports.html', context)
+
+
+
+
+
+
+
+
+
+startdate_present = False
+    enddate_present = False
+    group_present = False
+    university_present = False
+
+
+    if 'startdate' in request.GET:
+        if request.GET['startdate'] != '':
+            startdate_present = True
+            startdates = request.GET['startdate']
+            context['startdates'] = startdates
+            context['filtered_by_startdate'] = Paper.objects.filter(created__range= [startdates, str(date.today())])
+
+        else:
+            context['startdate'] = '2000-01-01'
+    if 'enddate' in request.GET:
+        if request.GET['enddate'] != '':
+            enddate_present = True
+            enddates = request.GET['enddate']
+            context['enddates'] = enddates
+            context['filtered_by_enddate'] = Paper.objects.filter(created__range= ['2000-01-01', enddates])
+
+        
+    if 'group' in request.GET:
+        if request.GET['group'] != '':
+            group_present = True
+            group = request.GET['group']
+            context['group'] = group
+            context['group_paper_count'] = Paper.objects.filter(group__name__contains = group).count()
+        else:
+           
+            groups = Group.objects.all()
+            filtered_groups = {}
+            for group in groups:
+                filtered_groups[f'{group.name}'] = Paper.objects.filter(group__name__contains = group).count()
+
+            filtered_groups = (str(filtered_groups).replace("{","").replace("}", "")).replace(',', '\n')
+            context['filtered_groups_papers'] = filtered_groups
+    
+    if 'university' in request.GET:
+        if request.GET['university'] != '':
+            university_present = True
+            university = request.GET['university']
+            context['university'] = university
+            context['universities_paper_count'] = Paper.objects.filter(group__university__name__contains = university).count()
+        else: 
+            print('no')
+            universities = University.objects.all()
+            filtered_universities = {}
+            for uni in universities:
+                filtered_universities[f'{uni.name}'] = Paper.objects.filter(group__university__name__contains = uni).count() 
+            filtered_universities = (str(filtered_universities).replace("{","").replace("}", "")).replace(',', '\n')
+            context['filtered_unis_papers'] = filtered_universities
+
+  
+    print(context)
+   

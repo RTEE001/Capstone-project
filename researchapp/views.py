@@ -13,6 +13,7 @@ import re
 from django.db.models import Q
 
 
+
 from .forms import UploadForm, UserForm, GroupForm
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -21,6 +22,7 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 # Create your views here.
 
+from datetime import date
 
 class ALViewUser(DetailView):
     model = User
@@ -482,7 +484,6 @@ def searchGroupsResult(request):
                 'selectedUni':a,
                 
     }
-
     return render (request, 'GroupSearchResult.html', context)
 
 class AViewProfile(LoginRequiredMixin,DetailView):
@@ -522,119 +523,225 @@ class AViewGroupProfile(LoginRequiredMixin,DetailView):
         context['papers'] = a       
         return context
 
+def filter_by_date_type_group(request, paper_list):
+   
+    if 'date' in request.GET:
+        if request.GET['date'] !='':
+            paper_list = paper_list.filter(created__icontains = request.GET['date'])
+    if 'type' in request.GET:
+        if request.GET['type'] !='':
+            paper_list = paper_list.filter(category__name__icontains = request.GET['type'])
+    if 'group' in request.GET:
+        if request.GET['type'] !='':
+            paper_list = paper_list.filter(group__name__icontains = request.GET['group'])
 
+    return paper_list
+    
 def filter_papers(request):
-    papers = Paper.objects.all()
-    groups = Group.objects.all()
-    unis = University.objects.all()
-    type = PaperType.objects.all()
+    
+    searches = ''
+    dates= ''
+    types = ''
+    groups = ''
+
+    if 'search' in request.GET:
+        searches = request.GET['search']
+    if 'date' in request.GET:
+        dates = request.GET['date']
+    if 'type' in request.GET:
+        types = request.GET['type']
+    if 'group' in request.GET:
+        groups = request.GET['group']
+
+
     context = {
-        'papers': papers,
-        'groups': groups,
-        'type': type,
-        'unis': unis
+        'papers': filter_by_date_type_group(request, search_paper(request)),
+        'groups': Group.objects.all(),
+        'type': PaperType.objects.all(), 
+        'selected_search': searches,
+        'selected_date': dates,
+        'selected_type': types,
+        'selected_group': groups
     }
-    if request.method == 'POST':           
-        startdate = request.POST.get('startdate')
-        enddate = request.POST.get('enddate')
-        type = request.POST.get('type')
-        group = request.POST.get('GroupCat')
-        if startdate == '' and enddate == '' and type == '':
-            print('path 1')
-            return render(request, 'paper.html', context)
-        elif (startdate == '' or enddate == '') and type != '':
-            print('path 2')
-            filter = Paper.objects.filter(category__name__contains = type)
-            context ={
-                'papers':filter
-            }
-            print(filter)
-            return render(request, 'paper.html', context)
-        elif startdate != '' and enddate != '' and type == '':
-            print('path 3')
-            filter = Paper.objects.filter(created__range = [startdate, enddate])
-            print(filter)
-            context ={
-                'papers':filter
-            }
-            return render(request, 'paper.html', context)                 
-        else: 
-            print('path 4')
-            filter = Paper.objects.filter(created__range = [startdate, enddate], category__name__contains = type)
-            print(filter)
-            context = {     
-                'papers':filter
-        
-            }
-            return render(request, 'paper.html',context)     
-    else:
-       
-        return render(request, 'paper.html', context)
+    
+    return render(request, 'paper.html', context)
 #
 
 
 def reports(request):
+    startdates= ''
+    enddates = ''
+    universities = ''
+    group = ''
 
-    group = Group.objects.all()
-    unis = University.objects.all()
+    if 'startdate' in request.GET:
+        startdates = request.GET['startdate']
+    if 'enddate' in request.GET:
+        enddates = request.GET['enddate']
+    if 'group' in request.GET:
+        group = request.GET['type']
+    if 'university' in request.GET:
+        universities = request.GET['university']
+
+    if group != '' and universities !='':
+        HttpResponse('<h1>Select either group only or university only</h1>')
+        
+        return render(request, 'reports.html')
+        
+
     context = {
-           
-            'groups': group,
-            'university': unis
-        }
-
-    if request.method == 'POST':
-            
-            startdate = request.POST.get('startdate')
-            enddate = request.POST.get('enddate')
-            univ= request.POST.get('uni')
-            group = request.POST.get('group')
-
-            if startdate == '' and enddate == ''  and univ =='' and group != '':
-                total_papers = Paper.objects.filter(group__Gname__contains = group)
-                context = {
-                    'filter':total_papers 
-                }
-                return render(request, 'reports.html', context)
-
-            # elif (startdate == '' or enddate == '')  and group !='' and uni !='':
-            #     filter = Paper.objects.filter(category__name__contains = type)
-            #     context ={
-            #         'filter':filter.count()
-            #     }
-             
-            #     return render(request, 'reports.html', context)
-
-            # elif startdate != '' and enddate != '' and type == '':
-            #     filter = Paper.objects.filter(created__range = [startdate, enddate])
-              
-            #     context ={
-            #         'filter':filter.count()
-            #     }
-            #     return render(request, 'reports.html', context)
-                        
-            # else: 
-            #     filter = Paper.objects.filter(created__range = [startdate, enddate], category__name__contains = type)
-              
-            #     context = {     
-            #         'filter':filter.count()
-            
-            #     }
-            #     return render(request, 'reports.html', context)       
-            
-    else:
+        
+        # 'Users': people_report_filter(request, searchPeopleResult(request)).count(),
+        'unis': University.objects.all(),
+        'groups': Group.objects.all(),
+        'type': PaperType.objects.all(), 
+        'selected_startdate': startdates,
+        'selected_enddate': enddates,
+        'selected_university': universities,
+        'selected_group': group
+    }
     
-        return render(request, 'reports.html', context)
+    return render(request, 'reports.html', context)
 ##needs work
 def generate_pdf(request):
  
     template_path = 'reports.html'
-    filter = Paper.objects.filter(group__Gname__contains = request.POST['group'])
-    context = {"filter":filter.count()}
-    print('context begins')
+
+    startdate_present = False
+    enddate_present = False
+    group_present = False
+    university_present = False
+
+    startdate = '2000-01-01'
+    enddate = str(date.today())  
+
+
+    context = {
+        
+        'startdate': startdate,
+        'enddate': enddate
    
-    print(context)
-    print('context ends')
+    }
+    
+    if 'startdate' in request.GET:
+        if request.GET['startdate'] != '':
+            startdate_present = True
+            startdate = request.GET['startdate']      
+    if 'enddate' in request.GET:
+        if request.GET['enddate'] != '':
+            enddate_present = True
+            enddate = request.GET['enddate']
+      
+    if 'group' in request.GET:
+        if request.GET['group'] != '':
+            group_present = True
+            group = request.GET['group']          
+    
+    if 'university' in request.GET:
+        if request.GET['university'] != '':
+            university_present = True
+            university = request.GET['university']
+
+    if group_present == False and university_present == False:
+        if startdate_present == True and enddate_present ==False:
+            context['startdate'] = startdate
+        elif startdate_present == True and enddate_present == True:
+            context['startdate'] = startdate
+            context['enddate'] = enddate
+        elif startdate_present ==False and enddate_present ==True:
+            context['enddate'] = enddate
+
+        context['total_number_of_users'] = User.objects.filter(date_joined__range = [startdate, enddate]).count()
+        context['total_number_of_universities'] = University.objects.filter(created__range = [startdate, enddate]).count()
+        context['total_number_of_groups'] = Group.objects.filter(created__range = [startdate, enddate]).count()
+        context['total_number_of_publications'] = Paper.objects.filter(created__range = [startdate, enddate]).count()
+
+        each_university_users_dict = {}
+        each_university_publications_dict = {}
+        each_university_masters_dict = {}
+        each_university_phd_dict = {}
+        each_university_researchers_dict = {}
+        each_university_graduates_dict = {}
+      
+
+        all_unis = University.objects.filter(created__range = [startdate, enddate])
+
+        for each_uni in all_unis:
+            
+            each_university_users_dict[f'{each_uni.name}'] = User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate]).count()
+            each_university_publications_dict[f'{each_uni.name}']= Paper.objects.filter(group__university__name__contains = each_uni, created__range = [startdate, enddate]).count()
+            each_university_masters_dict[f'{each_uni.name}']= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'masters').count()
+            each_university_phd_dict[f'{each_uni.name}']= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'phd').count()
+            each_university_researchers_dict[f'{each_uni.name}']= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'Researcher').count()   
+            each_university_graduates_dict[f'{each_uni.name}']= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'graduate').count()            
+
+        context['each_university_users_dict'] = (str(each_university_users_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['each_university_publications_dict'] = (str(each_university_publications_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['each_university_masters_dict'] = (str(each_university_masters_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['each_university_phd_dict'] = (str(each_university_phd_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['each_university_researchers_dict'] = (str(each_university_researchers_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['each_university_graduates_dict'] = (str(each_university_graduates_dict).replace("{","").replace("}", "")).replace(',', '\n')  
+
+    elif startdate_present == True and enddate_present ==True and group_present == True and university_present == False:
+        
+        context['startdate'] = startdate
+        context['enddate'] = enddate
+        context['total_number_of_users_in_group'] = User.objects.filter(date_joined__range = [startdate, enddate],  group__name__contains = group).count()
+        context['total_number_of_publications'] = Paper.objects.filter(created__range = [startdate, enddate], group__name__contains = group).count()
+
+        group_publications_dict = {}
+        group_masters_dict = {}
+        group_phd_dict = {}
+        group_researchers_dict = {}
+        group_graduates_dict = {}
+
+        group_publications_dict[group.name] =  Paper.objects.filter(group__name__contains = group, created__range = [startdate, enddate]).count()
+        group_masters_dict[group.name] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'masters').count()
+        group_phd_dict[group.name] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'phd').count()
+        group_researchers_dict[group.name] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'Researcher').count()
+        group_graduates_dict[group.name] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'graduate').count()
+
+        context['group_publications_dict'] = (str(group_publications_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['group_masters_dict'] = (str(group_masters_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['group_phd_dict'] = (str(group_phd_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['group_researchers_dict'] = (str(group_researchers_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['group_graduates_dict'] = (str(group_graduates_dict).replace("{","").replace("}", "")).replace(',', '\n')
+
+    elif startdate_present == True and enddate_present ==True and group_present == False and university_present == True:
+        context['startdate'] = startdate
+        context['enddate'] = enddate
+        context['total_number_of_users_in_uni'] = User.objects.filter(date_joined__range = [startdate, enddate], university__name__contains = university ).count()
+       
+        context['total_number_of_groups'] = Group.objects.filter(created__range = [startdate, enddate], university__name__contains = university).count()
+        context['total_number_of_publications'] = Paper.objects.filter(created__range = [startdate, enddate], group__university__name__contains = university).count()
+
+
+        each_group_users_dict = {}
+        each_group_publications_dict = {}
+        each_group_masters_dict = {}
+        each_group_phd_dict = {}
+        each_group_researchers_dict = {}
+        each_group_graduates_dict = {}
+      
+
+        all_groups_in_uni = Group.objects.filter(created__range = [startdate, enddate], university__name__contains = university )
+
+        for each_group in all_groups_in_uni:
+            
+            each_group_users_dict[f'{each_group.name}'] = User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate]).count()
+            each_group_publications_dict[f'{each_group.name}']= Paper.objects.filter(group__name__contains = each_group, created__range = [startdate, enddate]).count()
+            each_group_masters_dict[f'{each_group.name}']= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'masters').count()
+            each_group_phd_dict[f'{each_group.name}']= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'phd').count()
+            each_group_researchers_dict[f'{each_group.name}']= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'Researcher').count()   
+            each_group_graduates_dict[f'{each_group.name}']= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'graduate').count()            
+
+        context['each_group_users_dict'] = (str(each_group_users_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['each_group_publications_dict'] = (str(each_group_publications_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['each_group_masters_dict'] = (str(each_group_masters_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['each_group_phd_dict'] = (str(each_group_phd_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['each_group_researchers_dict'] = (str(each_group_researchers_dict).replace("{","").replace("}", "")).replace(',', '\n')
+        context['each_group_graduates_dict'] = (str(each_group_graduates_dict).replace("{","").replace("}", "")).replace(',', '\n')
+     
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'filename="report.pdf"'
@@ -694,11 +801,10 @@ def search_paper(request):
         entry_query = get_query(query_string, ['title', 'description','author'])
 
         paper_list= Paper.objects.filter(entry_query)
-        return render(request,'paper.html',{'papers':paper_list} )
+        return paper_list
     else:
         display_paper = Paper.objects.all()
-        return render(request, 'paper.html', {'papers':display_paper})
-
+        return display_paper
 
 def search(request):
     
