@@ -1,0 +1,7 @@
+{% extends 'index.html'%}
+{% block body %}
+
+{% if user.is_reseacher %}
+<p> Hello, {{user.first_name}} you are logged in as {{user.role}}</p>
+{% endif %}
+{% endblock %}
