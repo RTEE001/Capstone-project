@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %}</title>
+    <!-- CSS only -->
+   
+    {% block style %}{% endblock %}
+
+<p style="text-align:center;">
+  <a href="{% url 'home' %}">
+<img src="{% static 'media/logo.svg'%}"
+	alt="Logo"
+style="width: 100px; height: 100px;">
+ </a>
+ {% block ustyle %}{% endblock %}
+    
+    <!-- Custom styles for this template -->
+  <link href="{% static 'css/carousel.css' %}" rel="stylesheet">
+
+
+  </head>
+
+
+
+  <body>
+
+    <!-- Example Code -->
+
+     <nav class="navbar navbar-expand-lg" style="background-color: #0f386c">
+
+       <div class="container-fluid" >
+
+         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+           <span class="navbar-toggler-icon"></span>
+         </button>
+         <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+
+           <a class="navbar-brand" style="color: #FFFFFF" href="{% url 'home' %}">Home</a>
+
+           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+             <li class="nav-item">
+               <a class="nav-link" style="color: #FFFFFF" href="{% url 'researchgroup' %}">Research Groups</a>
+             </li>
+
+             <li class="nav-item">
+               <a class="nav-link" style="color: #FFFFFF" href="{% url 'people' %}">People</a>
+             </li>
+
+
+             <li class="nav-item">
+               <a class="nav-link" style="color: #FFFFFF" href="{% url 'papers' %}">Research Publications</a>
+             </li>
+
+             <li class="nav-item">
+               <a class="nav-link" style="color: #FFFFFF" href="{% url 'about' %}">About</a>
+             </li>
+
+             <li class="nav-item">
+               <a class="nav-link" style="color: #FFFFFF" href="{% url 'contact' %}">Contact</a>
+             </li>
+
+           </ul>
+           <form class="d-flex" role="search" action = "{% url 'search' %}">
+             <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name = "search">
+             <button class="btn btn-primary" style="color: #FFFFFF" type="submit">Search</button>
+           </form>
+         </div>
+
+           <div class="dropdown">
+             <li class="nav-item">
+            <button type="button" style="color: #FFFFFF" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+              Account
+            </button>
+            <ul class="dropdown-menu">
+		{% if user.is_authenticated %}
+		<li><a class="dropdown-item" href="{% url 'dashboard' %}">Dashboard</a></li>
+              <li><a class="dropdown-item" href="{% url 'loggedout' %}">logout</a></li>
+		
+		{% else %}
+
+              <li><a class="dropdown-item" href="{% url 'signin' %}">Sign in</a></li>
+              
+		{% endif %}
+            </ul>
+         </li>
+       </div>
+
+
+     </nav>
+	{% block body %}
+
+	{% endblock %}
+       <!-- FOOTER -->
+
+       <div class="container">
+         <footer class="py-5">
+           <div class="row">
+             <div class="col-6 col-md-2 mb-3">
+               <h5>Section</h5>
+               <ul class="nav flex-column">
+                 <li class="nav-item mb-2"><a href="{% url 'home' %}" class="nav-link p-0 text-muted">Home</a></li>
+                 <li class="nav-item mb-2"><a href="{% url 'researchgroup' %}" class="nav-link p-0 text-muted">Research Groups</a></li>
+                 <li class="nav-item mb-2"><a href="{% url 'people' %}" class="nav-link p-0 text-muted">People</a></li>
+                 <li class="nav-item mb-2"><a href="{% url 'about' %}" class="nav-link p-0 text-muted">About</a></li>
+                 <li class="nav-item mb-2"><a href="{% url 'contact' %}" class="nav-link p-0 text-muted">Contact</a></li>
+
+
+               </ul>
+             </div>
+
+           
+           </div>
+
+           <div class="d-flex flex-column flex-sm-row justify-content-between py-4 my-4 border-top">
+             <p>&copy; 2022 Company, Inc. All rights reserved.</p>
+             <ul class="list-unstyled d-flex">
+               <li class="ms-3"><a class="link-dark" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#twitter"/></svg></a></li>
+               <li class="ms-3"><a class="link-dark" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#instagram"/></svg></a></li>
+               <li class="ms-3"><a class="link-dark" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#facebook"/></svg></a></li>
+             </ul>
+           </div>
+         </footer>
+       </div>
+{% block main%} {% endblock %}
+  </body>
+</html>
