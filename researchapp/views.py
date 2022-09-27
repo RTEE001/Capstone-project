@@ -6,7 +6,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.views import generic
-from django.views.generic import  DetailView, UpdateView, CreateView, DeleteView, ListView
+from django.views.generic import  DetailView, UpdateView, CreateView, DeleteView, ListView, View
 from .forms import ContactForm, UserForm
 from django.http import HttpResponse
 import re
@@ -21,6 +21,8 @@ from xhtml2pdf import pisa
 # Create your views here.
 
 from datetime import date
+import pygal
+
 
 class ALViewUser(DetailView):
     model = User
@@ -616,9 +618,9 @@ def filter_papers(request):
 
 
 def reports(request):
-   
+ 
     context = reports_context(request)
-    print(context)
+
     return render(request, 'reports.html', context)
 
 

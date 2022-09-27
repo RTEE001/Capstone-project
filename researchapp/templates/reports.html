@@ -127,7 +127,6 @@
             Total number of graduates in group: {{group_graduates_dict|linebreaksbr}} 
         </p>
 
-        {% comment %}   select_group == '' and selected_university != '' {% endcomment %}
         {% else%}
         <p>
             Total number of users in university: {{total_number_of_users_in_uni|linebreaksbr}} 
@@ -157,6 +156,7 @@
             Total number of graduates per group: {{each_group_graduates_dict|linebreaksbr}} 
         </p>
         {%endif%}
+        
     </center>
 </body>
 <html>
