@@ -148,6 +148,16 @@
     margin: 25px 0;
   }
 }
+
+
+
+h1 {
+  font-size: 20px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+
 </style>
 
   </head>
@@ -168,7 +178,7 @@
 
            <div class="col-sm-8">
              <br>
-            <h3 style="text-align:center;" >Reports</h3>
+            <h3 style="text-align:center;" > Upload Publications</h3>
              <br>
 
            </div>
@@ -181,15 +191,6 @@
 
 
               <body>
-<br>
-<br>
-
-
-
-
-
-
-
 
 
        			<!-- Sidebar -->
@@ -269,6 +270,11 @@
        			</nav>
        			<!-- End sidebar -->
 
+
+
+
+
+
        			<!-- Dark overlay -->
            		<div class="overlay"></div>
 
@@ -304,7 +310,117 @@
        	        <!-- End content -->
 
                </div>
+
+
+
+
+
                <!-- End wrapper -->
+
+
+
+
+            <div class="col-md-6 offset-md-3 mt-5">
+
+             <h1>Fill the following to Upload Publication</h1>
+
+
+
+                   <div class="form-group">
+                     <label for="exampleInputName">Title</label>
+                     <input type="text" name="fullname" class="form-control"
+                     id="exampleInputName" placeholder="Enter your title" required="required">
+                   </div>
+
+
+                   <div class="form-group">
+                     <label for="exampleInputName1">Author</label>
+                     <input type="text" name="fullname" class="form-control" id="exampleInputName1"
+                     placeholder="Enter your name and surname" required="required">
+                   </div>
+
+                   <div class="form-group">
+                     <label for="exampleInputName2">Co Author</label>
+                     <input type="text" name="fullname" class="form-control" id="exampleInputName2"
+                     placeholder="Enter Co Author name and surname" required="required">
+                   </div>
+
+
+
+
+                   <div class="form-group">
+                     <label for="exampleInputEmail1" required="required">Email address</label>
+                     <input type="email" name="email" class="form-control" id="exampleInputEmail1"
+                      aria-describedby="emailHelp" placeholder="Enter email">
+                   </div>
+
+
+                   <div class="form-group">
+                     <label for="exampleFormControlSelect1">Category</label>
+                     <select class="form-control" id="exampleFormControlSelect1"
+                      name="platform" required="required">
+                       <option>hgf</option>
+                       <option>fef</option>
+                       <option>efef</option>
+                       <option>hgf</option>
+                       <option>fef</option>
+                       <option>efef</option>
+                     </select>
+                   </div>
+
+                   <div class="form-group">
+                     <label for="exampleFormControlSelect2">Research Group</label>
+                     <select class="form-control" id="exampleFormControlSelect2" name="platform"
+                     required="required">
+                       <option>UCT</option>
+                       <option>uwc</option>
+                       <option>Cgsh</option>
+                       <option>hgf</option>
+                       <option>fef</option>
+                       <option>efef</option>
+                     </select>
+                   </div>
+
+
+
+                   <hr>
+                   <div class="form-group mt-3">
+                     <label class="mr-2">Upload your PDF:</label>
+                     <input type="file" name="file">
+                   </div>
+
+
+
+
+                   <hr>
+
+                   <div class="form-group mt-3">
+                     <label class="mr-2">Upload your PEER Review:</label>
+                     <input type="file" name="file">
+                   </div>
+
+                    <hr>
+
+
+
+                       <button type="submit" class="btn btn-primary" href="#" >Submit</button> 
+
+                 </form>
+             </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                <!-- Javascript -->
        		<script src="assets/js/jquery-3.3.1.min.js"></script>
@@ -316,58 +432,6 @@
                <script src="assets/js/jquery.waypoints.min.js"></script>
                <script src="assets/js/jquery.mCustomScrollbar.concat.min.js"></script>
                <script src="assets/js/scripts.js"></script>
-
-
-               <div class="container">
-
-             		<div class="alert alert-warning">
-             			<strong>Remember!</strong>
-             		</div>
-
-             		<table id="itemsTable2" class="table"
-             			data-toggle="table"
-             			data-url="data.json"
-             			data-height="420"
-             			data-filter="true"
-             			data-icons-prefix="fa"
-             			data-pagination="true"
-             		    data-side-pagination="server"
-             		    data-page-number="1"
-             		    data-page-size="15">
-             			<thead>
-             				<tr>
-             					<th data-field="id" data-align="center" data-sortable="true">Report ID</th>
-                                 <th data-field="name" data-align="center" data-sortable="true"
-             										data-filter-type="input">Reserch Groups</th>
-                                 <th data-field="price" data-align="" data-sortable="true" data-filter-type="select"
-             										 data-filter-data="var:University">University Name</th>
-                                 <th data-field="date" data-align="" data-class="col-sm-3"
-             										data-sortable="true" data-filter-type="datepicker_range">Report Date</th>
-             				</tr>
-             			</thead>
-             		</table>
-
-
-             	</div>
-
-             	<script src="assets/js/jquery-1.11.3.js"></script>
-             	<script src="assets/js/bootstrap.js"></script>
-             	<script src="assets/js/bootstrap-table.js"></script>
-             	<script src="assets/js/bootstrap-table-en-US.js"></script>
-             	<script src="assets/js/select2.js"></script>
-             	<script src="assets/js/jquery-ui-1.10.3.min.js"></script>
-             	<script src="bootstrap-table-filter.js"></script>
-             	<script type="text/javascript">
-
-                     var University = [{ id: 1, text: 'University of Cape Town' }, { id: 2, text: 'University of Pretoria' },
-             				{ id: 3, text: 'University of Western Cape' }];
-
-             		$('#itemsTable').on('column-search.bs.table', function () {
-             				console.log('hello event');
-                     });
-             	</script>
-
-
 
 
 

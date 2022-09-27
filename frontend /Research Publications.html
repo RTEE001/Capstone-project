@@ -17,6 +17,63 @@ integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4
 style="width: 100px; height: 100px;">
  </a>
 
+ <style>
+ .dropbtn {
+      background-color: white;
+      color: black;
+      padding: 10px 100px;
+
+      width: 100%;
+
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+ }
+ .dropdown {
+     display: inline-block;
+     position: relative
+ }
+
+ .dropdown1 {
+   display: inline-block;
+   position: center;
+     padding: 12px 30px;
+     margin: 20px 10px;
+     box-sizing: border-box;
+ }
+ .dropdown-content {
+     position: absolute;
+     background-color: lightgrey;
+     min-width: 150px;
+     display: none;
+     z-index: 1;
+ }
+ .dropdown-content a {
+     color: black;
+     padding: 12px 16px;
+     text-decoration: none;
+     display: block;
+ }
+ .dropdown-content a:hover {
+     background-color: orange;
+ }
+ .dropdown:hover .dropdown-content {
+     display: block;
+ }
+ .dropdown:hover .dropbtn {
+     background-color: grey;
+ }
+
+
+ form-group {
+  width: 100%;
+}
+
+
+ </style>
+
 
 
   </head>
@@ -106,6 +163,125 @@ style="width: 100px; height: 100px;">
       <!-- /.container -->
 
 
+      <div class="container">
+        <div class="row searchFilter" >
+           <div class="col-sm-12" >
+            <div class="input-group" >
+             <input id="table_filter" type="text" class="form-control" aria-label="Text input with segmented button dropdown" >
+             <div class="input-group-btn" >
+
+
+              <button id="searchBtn" type="button" class="btn btn-secondary btn-search" >
+                <span class="glyphicon glyphicon-search" >&nbsp;</span> <span class="label-icon" >
+
+                  Search</span></button>
+             </div>
+            </div>
+           </div>
+        </div>
+      </div>
+<br>
+ &nbsp
+
+    <div class="dropdown">
+
+      <div class="form-group">
+        <label for="exampleFormControlSelect1">Research Group</label>
+        <select class="form-control" id="exampleFormControlSelect1" name="platform"
+        required="required">
+          <option>UCT</option>
+          <option>uwc</option>
+          <option>Cgsh</option>
+          <option>hgf</option>
+          <option>fef</option>
+          <option>efef</option>
+        </select>
+      </div>
+    </div>
+
+    </div>
+
+    <div class="dropdown1"   width: 100%;>
+
+
+      <div class="form-group"   width: 100%;>
+        <label for="exampleFormControlSelect2">University</label>
+        <select class="form-control" id="exampleFormControlSelect2" name="platform"
+        required="required">
+          <option>UCT</option>
+          <option>uwc</option>
+          <option>Cgsh</option>
+          <option>hgf</option>
+          <option>fef</option>
+          <option>efef</option>
+        </select>
+      </div>
+    </div>
+
+    </div>
+
+
+    <div class="dropdown1">
+      <div class="form-group">
+        <label for="exampleFormControlSelect3">Research Publication</label>
+        <select class="form-control" id="exampleFormControlSelect3" name="platform"
+        required="required">
+          <option>UCT</option>
+          <option>uwc</option>
+          <option>Cgsh</option>
+          <option>hgf</option>
+          <option>fef</option>
+          <option>efef</option>
+        </select>
+      </div>
+
+
+    </div>
+
+    </div>
+
+    <div class="dropdown1">
+
+      <div class="form-group">
+
+        <label for="exampleFormControlSelect4">Research Group</label>
+
+        <select class="form-control" id="exampleFormControlSelect4" name="platform"
+        required="required">
+          <option>UCT</option>
+          <option>uwc</option>
+          <option>Cgsh</option>
+          <option>hgf</option>
+          <option>fef</option>
+          <option>efef</option>
+        </select>
+      </div>
+
+
+    </div>
+    <div class="dropdown1" >
+     <button type="submit" class="btn btn-primary" href="" >Search</button>
+
+    </div>
+
+
+
+
+<br>
+<br>
+<br>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+
+
+         <hr class="featurette-divider">
        <!-- FOOTER -->
 
        <div class="container">
