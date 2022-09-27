@@ -23,6 +23,8 @@ urlpatterns = [
     path('contact_form/', views.CreateContactUs.as_view(), name = 'contact_form'),
 
 
+    path('list_chats/', views.ListMessages.as_view(), name = 'contact_list'),
+
 
     path('papers/', views.filter_papers, name = 'papers'),
     path('reports/', views.reports, name = 'reports'),

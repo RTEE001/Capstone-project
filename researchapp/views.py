@@ -967,7 +967,7 @@ class CreateContactUs(CreateView):
     form_class = ContactForm
     model = Contact
     template_name = 'contact_form.html'
-    success_url = reverse_lazy('contact_form')
+    success_url = reverse_lazy('signin')
 
     def form_valid(self, form):
         self.object = form.save(commit = False)
@@ -979,5 +979,5 @@ class ListMessages(ListView):
     model = Contact
     template_name = 'contact_us_list.html'
 
-    def get_query_set(self):
-        return Contact.objects.filter(date_posted__lt = timezone.now()).order_by('date_posted')
+    def get_queryset(self):
+        return Contact.objects.filter(date_posted__lt = timezone.now()).order_by('-date_posted')
