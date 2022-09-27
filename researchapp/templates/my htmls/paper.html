@@ -1,0 +1,57 @@
+{%load static%}
+
+<!DOCTYPE html>
+<head>
+    <title> Papers </title>
+</head>
+
+<body>
+    <center>
+        <h1> Filter papers <h1>
+
+        <hr>
+      
+        <form method = 'POST'>
+            {% csrf_token %}
+            <label for="dates">start date:</label>
+            <input type="date" id="date" name="startdate">
+    
+            <label for="dates">end date:</label>
+            <input type="date" id="date" name="enddate">
+     
+            <label for="type"><b>type</b></label>
+            <select id="type" name="type">
+            <option selected> </option>
+            {% for typ in type%} 
+            <option value={{typ.name}} >{{typ.name}}  
+            </option>
+            {% endfor %}
+     
+
+
+ 
+        <input type = 'submit' name = 'Search'/>
+      
+        <table border = '1'>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Co_author</th>
+                <th>Description</th>
+                <th>View</th>
+               
+            </tr>
+            {% for paper in papers%}
+            <tr> 
+                <td>{{paper.title}}</td>
+                <td>{{paper.author}}</td>
+                <td>{{paper.co_author}}</td>
+                <td>{{paper.description}}</td>
+                <td><a href = '{{ paper.pdf.url }}'> download </a></td>
+             
+            </tr>
+            {% endfor%}
+        </table>
+    </center>
+</body>
+<html>
