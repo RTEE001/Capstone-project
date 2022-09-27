@@ -1,0 +1,17 @@
+{%block body%}
+Rerfresh For Any New Chats</button></a><br><br><br>
+
+    {% for chat in object_list %}
+
+
+        <div class="chat" style="width: 150%; background: white; box-shadow: 2px 0px 25px 20px #111;">
+            <p><b {{ chat.name|linebreaks }}- {{ chat.email|linebreaks }}</b></p>
+            <p><b class="chat-content">{{ chat|linebreaks }}</b></p>
+            <small class="chat-date">{{ chat.date_posted }}</small>
+        </div><br><br><br>
+
+    {% empty %}
+    <h1 class="heading">No Chats Yet Be The First To Message!</h1><br>
+
+    {% endfor %}
+{% endblock %}
