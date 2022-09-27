@@ -22,24 +22,35 @@ from xhtml2pdf import pisa
 
 from datetime import date
 
-
+#Dashboard
+'''
+This fuction changes the status of the user account active to inactive
+'''
 def deactivate_account(request):
-    a=request.GET['key']
-    print('keyr'+str(a))
-    user = User.objects.get(id=a)
+    user_id=request.GET['key']
+    user = User.objects.get(id=user_id)
     user.is_active=False
     user.save()
 
     return redirect('listusers')
 
+#Dashboard
+'''
+This fuction changes the status of the user account from inactive to active 
+'''
 def activate_account(request):
-    a=request.GET['keys']
-    print('keyr'+str(a))
-    user = User.objects.get(id=a)
+    user_id=request.GET['keys']
+    user = User.objects.get(id=user_id)
     user.is_active=True
     user.save()
     return redirect('listusers')
 
+#Dashboard
+'''
+This function renders all publication that are editable by a user 
+depending on the type of user and allows filtering according 
+to search, date, types of publicatins and groups
+'''
 def managePublications(request):
     searches = ''
     dates= ''
@@ -54,7 +65,7 @@ def managePublications(request):
         types = request.GET['type']
     if 'group' in request.GET:
         group = request.GET['group']
-        print(request.GET['group']+"sjhbgdvhfb")
+        
     if getRole(request)=="CAIRAdmin":
         displayPapers=filter_by_date_type_group(request, search_paper(request))
         groups = Group.objects.all()
@@ -83,19 +94,23 @@ def managePublications(request):
     }
     return render(request, 'manageownpapers.html', context )
 
-class PDeleteView(DeleteView):
+#Dashboard
+'''
+This class deletes publications
+'''
+class PublicationsDeleteView(DeleteView):
 	model = Paper
 	template_name = 'confirm_delete.html'
 	success_url = reverse_lazy('managepublications')
 	success_message = 'Data was deleted successfully'
 
+#Dashboard
+'''
+This Class allows user to user edit profile informations and accounts
+with supervisor preveliges to edit other users
 
-class ALViewUser(DetailView):
-    model = User
-    template_name='user_detail.html'
-
-
-class AEditUser(generic.UpdateView):
+'''
+class EditUserProfile(generic.UpdateView):
     model = User
     form_class = UserForm
   
@@ -115,12 +130,16 @@ class AEditUser(generic.UpdateView):
         """ Passes the request object to the form class.
             This is necessary to only display members that belong to a given user"""
         
-        kwargs = super(AEditUser, self).get_form_kwargs()
+        kwargs = super(EditUserProfile, self).get_form_kwargs()
         kwargs['request'] = self
         
         
         return kwargs
 
+#Dashboard
+'''
+This class allows the user to edit publication details
+'''
 class EditPaper(generic.UpdateView):
     model = Paper
     form_class = UploadForm
@@ -128,79 +147,81 @@ class EditPaper(generic.UpdateView):
     success_url = reverse_lazy('managepublications')
 
     def get_context_data(self, **kwargs):
+        """ Passes the context object to the form class.
+         This is necessary to only pass different views to different types of users"""
         context = super().get_context_data(**kwargs)
         context['Role'] = getRole(self.request)
         return context
 
     def get_form_kwargs(self):
         """ Passes the request object to the form class.
-         This is necessary to only display members that belong to a given user"""
+         This is necessary to only display papers that belong to a given user"""
         
         kwargs = super(EditPaper, self).get_form_kwargs()
         kwargs['request'] = self.request.user
         return kwargs
 
-
-
-class AEditGroup(UpdateView): 
+#Dashboard
+'''This class allows users with manage group previleges to edit group information'''
+class EditGroup(UpdateView): 
     model = Group
     form_class = GroupForm
     template_name = 'GroupEdit.html'
     success_url = reverse_lazy('listgroups')
     def get_context_data(self, **kwargs):
+        """ Passes the context object to the form class.
+         This is necessary to only pass different views to different types of users"""
         context = super().get_context_data(**kwargs)
         
         context['Role'] = getRole(self.request)
         return context
 
-    
-class ListUserView(generic.ListView):
-    model = User
-    template_name = 'list_users.html'
-    context_object_name = 'users2'
-    paginate_by = 4
+#Dashboard
 
-    def get_queryset(self):
-        return User.objects.order_by('-id')
-
+'''This function allow user with supervisor previleges to modify child user passwords'''
 def passwordChange(request):
     if request.method == 'POST' and 'psw' in request.POST :
         if 'key' in request.POST:
-            new_psw = request.POST['psw']
+            new_password = request.POST['psw']
             user=User.objects.get(id=request.GET['key'])
-            user.set_password(new_psw)
+            user.set_password(new_password)
             user.save()
         
-    a=""
+    user_id=""
     if 'key' in request.GET:
-        a = request.GET['key']
+        user_id = request.GET['key']
     print('this is'+request.method )
     context={
-        'users': a
+        'users': user_id
     }
 
     return render(request, 'changePassword.html', context)
 
+#Shared
+
+'''This fuction renders the home page'''
 def home(request):
     return render(request,'home.html')
 
-def homelogged(request):
-    return render(request,'people.html')
-
-
+#shared
+'''This function renders the research groups page'''
 def researchgroup(request):
     context={
         'groups': Group.objects.all()
     }
     return render(request,'researchgroup.html', context)
-
+#shared
+'''This function renders the about page '''
 def about(request):
     return render(request,'about.html')
 
+#shared
+'''This function renders the contact page '''
 def contact(request):
     return render(request,'contact.html')
 
-
+#shared
+'''This function renders the people page '''
 def people(request):
     context ={
             'users': User.objects.all(),
@@ -208,30 +229,34 @@ def people(request):
     }
     return render(request,'people.html', context)
 
+
+#shared
+'''This function renders the research publication page'''
 def research(request):
-   
-        
-       
     return render(request,'research.html')
 
   
-
+#shared
+'''This function allows logged-in user to logout'''
 def logoutView(request):
     logout(request)
     return redirect('home')
 
-
+#shared
+'''This function renders the signin page'''
 def signin(request):
     return render(request, 'signin.html')
 
-
+#Dashboard
+'''This class allows logged in users to upload publications'''
 class upload_paper(CreateView):
     model = Paper
     form_class = UploadForm
     template_name ='upload.html'
     success_url = reverse_lazy('managepublications')
     def get_context_data(self, **kwargs):
-        
+        """ Passes the context object to the form class.
+         This is necessary to only pass different views to different types of users"""
         context = super().get_context_data(**kwargs)
         context['Role'] = getRole(self.request)
         
@@ -246,8 +271,8 @@ class upload_paper(CreateView):
         else:
             entry_query = get_query(query, ['author', 'co_author'])
         
-        a=Paper.objects.all().filter(entry_query)
-        context['papers'] = a
+        papers=Paper.objects.all().filter(entry_query)
+        context['papers'] = papers
     
         return context
     def get_form_kwargs(self):
@@ -261,9 +286,11 @@ class upload_paper(CreateView):
         return kwargs
 
 
+#shared
+'''This is function athencates and logs users in'''
 
 
-def login1(request):
+def loginView(request):
     if request.method == 'POST':
        
         try:
@@ -283,6 +310,8 @@ def login1(request):
             return redirect('signin')
     return redirect('signin')
 
+#dashboard
+'''This function checks and returns the type of user'''
 def getRole(request):
     if request.user.is_authenticated:
         
@@ -303,23 +332,29 @@ def getRole(request):
     else:
         return 'general'
 
+#dashboard
+'''This function renders the dashboard page'''
 def dashboardView(request):
     return render(request,'dashboard.html', filterUsersbyrole(request))
 
+#dashboard
+'''
+This function filters groups, users and returns context according to user type
+'''
 def filterUsersbyrole(request):
-    qs = User.objects.all()
+    users = User.objects.all()
     groups = Group.objects.all()
     if getRole(request)=='GroupAdmin':
-        qs = qs.filter(group__name__icontains=request.user.group)
+        users = users.filter(group__name__icontains=request.user.group)
     elif getRole(request)=="UniAdmin":
-        qs = qs.filter(university__name__icontains=request.user.university)
+        users = users.filter(university__name__icontains=request.user.university)
         groups = groups.filter(university__name__icontains=request.user.university)
     elif getRole(request)=="Researcher":
-        qs = qs.filter(group__name__icontains=request.user.group)
-        qs = qs.filter(role__RoleType__icontains='student')
+        users = users.filter(group__name__icontains=request.user.group)
+        users = users.filter(role__RoleType__icontains='student')
     
     context = {
-        'users': qs,
+        'users': users,
         'groups': groups,
         'Roles' : Role.objects.all(),
         'Role': getRole(request),
@@ -327,25 +362,28 @@ def filterUsersbyrole(request):
         'studentRoles': StudentRole.objects.all()
     }
     return context
-
+#dashboard
+'''This function filters and returns child users according to user type'''
 def getFilteredUsers(request):
-    qs = User.objects.all()
+    users = User.objects.all()
     groups = Group.objects.all()
     if getRole(request)=='GroupAdmin':
-        qs = qs.filter(group__name__icontains=request.user.group)
+        users = users.filter(group__name__icontains=request.user.group)
     elif getRole(request)=="UniAdmin":
-        qs = qs.filter(university__name__icontains=request.user.university)
+        users = users.filter(university__name__icontains=request.user.university)
         groups = groups.filter(university__name__icontains=request.user.university)
     elif getRole(request)=="Researcher":
-        qs = qs.filter(group__name__icontains=request.user.group)
-        qs = qs.filter(role__RoleType__icontains='student')
-    return qs
-
+        users = users.filter(group__name__icontains=request.user.group)
+        users = users.filter(role__RoleType__icontains='student')
+    return users
+#dashboard
+'''This function renders page to manage child users'''
 def dashboardManageUsers(request):
     if getRole(request)=='student':
         return redirect('dashboard')
     return render(request, 'list_users.html', filterUsersbyrole(request))
-
+#dashboard
+'''This function renders page to manage groups'''
 def dashboardManageGroups(request):
     return render(request, 'list_groups.html', filterUsersbyrole(request))
 
@@ -470,7 +508,8 @@ def create_Researcher(request):
                 a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.POST['UniCat']), group=Group.objects.get(name__exact=request.POST['GroupCat']))
                 a.save()
     return redirect('listusers')
-
+    #dashboard
+'''This function saves universtity details in the database'''
 def addUnidetails(request):
     if request.method == 'POST':
         form = (request.POST, request.FILES)
@@ -481,11 +520,14 @@ def addUnidetails(request):
         return redirect('dashboard')
 
     return redirect('addUni')
-
-def addUni(request):
+    #dashboard
+'''This funtion renders university upload form'''
+def addUniversity(request):
     return render(request, 'addUni.html', filterUsersbyrole(request))
-
-def filter_by_nameDash(request):
+#dashboard
+'''This function allow search child users by name from dashboard and filter users 
+    according to particular type of user logged in'''
+def filter_by_nameDashboard(request):
     query_string = ''
     if ('query' in request.GET) and request.GET['query']!="":
         query_string = request.GET['query']
@@ -497,6 +539,8 @@ def filter_by_nameDash(request):
     else:
         return getFilteredUsers(request)
 
+#shared
+'''This function allow search users by name '''
 def filter_by_nameAll(request):
     query_string = ''
     if ('query' in request.GET) and request.GET['query']!="":
@@ -510,19 +554,20 @@ def filter_by_nameAll(request):
         return User.objects.all()
     
 
+'''This function allow search groups by name '''
 def filter_group_by_nameAll(request):
     query_string = ''
     if ('query' in request.GET) and request.GET['query']!="":
         query_string = request.GET['query']
         
         entry_query = get_query(query_string, ['university__name', 'name'])
-        a=Group.objects.all().filter(entry_query)
+        groups=Group.objects.all().filter(entry_query)
         
-        return a
+        return groups
        
     else:
         return Group.objects.all()
-
+'''This function allows user to filter users according to different categories'''
 def filter_by_category(request, user_list):
     
     if ('UniCat' in request.GET): 
@@ -536,6 +581,9 @@ def filter_by_category(request, user_list):
             user_list=user_list.filter(role__RoleType__icontains=request.GET['RoleCat'])
     return user_list
 
+#dashboard
+'''This function renders page where a supervisor can manage other users  '''
+
 def manageUserFilter(request):
     
     found_entries = None
@@ -544,7 +592,7 @@ def manageUserFilter(request):
                 
     if getRole(request)=="CAIRAdmin":
         groups = Group.objects.all()
-    user_list = filter_by_category(request,filter_by_nameDash(request))
+    user_list = filter_by_category(request,filter_by_nameDashboard(request))
     context = {
                 
                 'Roles': Role.objects.all(),
@@ -560,40 +608,42 @@ def manageUserFilter(request):
                 }
     
     return render(request, 'list_users.html',context)
-
+#shared
+'''This function renders a page where users can search for and filter users by category'''
 def searchPeopleResult(request):
-    a=""
-    b=""
-    c=""
-    d=""
+    university=""
+    group=""
+    role=""
+    query=""
     if ('UniCat' in request.GET):
-        a=request.GET['UniCat']
+        university=request.GET['UniCat']
     if ('GroupCat' in request.GET):
-        b=request.GET['GroupCat']
+        group=request.GET['GroupCat']
     if ('RoleCat' in request.GET):
-        c=request.GET['RoleCat']
+        role=request.GET['RoleCat']
     if ('query' in request.GET):
-        d = request.GET['query']
+        query = request.GET['query']
     
     
     context ={
             'users':filter_by_category(request,filter_by_nameAll(request)),
             'groups': Group.objects.all(),
             'UniCategory': University.objects.all(),
-                'selectedUni':a,
-                'selectedRole': c,
-                'selectedGroup': b,
-                'searchName': d,
+                'selectedUni':university,
+                'selectedRole': role,
+                'selectedGroup': group,
+                'searchName': query,
                 'Roles': Role.objects.all(),
 
     }
     return render(request, 'PeopleSearchResults.html', context)
-
+#shared
+'''This function renders a page where users can search for and filter users by university'''
 def searchGroupsResult(request):
-    a=""
+    university=""
     
     if ('UniCat' in request.GET):
-        a=request.GET['UniCat']
+        university=request.GET['UniCat']
     
     
     
@@ -601,11 +651,13 @@ def searchGroupsResult(request):
             
             'groups': filter_by_category(request,filter_group_by_nameAll(request)),
             'UniCategory': University.objects.all(),
-                'selectedUni':a,
+                'selectedUni':university,
                 
     }
     return render (request, 'GroupSearchResult.html', context)
 
+#dashboard
+'''This class allow users to edit profile'''
 class AViewProfile(LoginRequiredMixin,DetailView):
     model=User
     template_name = 'viewProfile.html'
@@ -619,12 +671,14 @@ class AViewProfile(LoginRequiredMixin,DetailView):
             query+=str(i.first_name)+" "+str(i.last_name)
             
         entry_query = get_query(query, ['author', 'co_author'])
-        a=Paper.objects.all().filter(entry_query)
+        papers=Paper.objects.all().filter(entry_query)
         
        
-        context['papers'] = a
+        context['papers'] = papers
         
         return context
+#dashboard
+'''This class allow users to edit group profile'''
 class AViewGroupProfile(LoginRequiredMixin,DetailView):
     model=Group
     template_name = 'viewGroupProfile.html'
@@ -638,346 +692,7 @@ class AViewGroupProfile(LoginRequiredMixin,DetailView):
             query+=str(i.name)
             
         entry_query = get_query(query, ['name'])
-        a=Group.objects.all().filter(entry_query)       
+        groups=Group.objects.all().filter(entry_query)       
        
-        context['papers'] = a       
+        context['papers'] = groups       
         return context
-
-def filter_by_date_type_group(request, paper_list):
-   
-    if 'date' in request.GET:
-        if request.GET['date'] !='':
-            paper_list = paper_list.filter(created__icontains = request.GET['date'])
-    if 'type' in request.GET:
-        if request.GET['type'] !='':
-            paper_list = paper_list.filter(category__name__icontains = request.GET['type'])
-    if 'group' in request.GET:
-        if request.GET['type'] !='':
-            paper_list = paper_list.filter(group__name__icontains = request.GET['group'])
-
-    return paper_list
-    
-def filter_papers(request):
-    
-    searches = ''
-    dates= ''
-    types = ''
-    groups = ''
-
-    if 'search' in request.GET:
-        searches = request.GET['search']
-    if 'date' in request.GET:
-        dates = request.GET['date']
-    if 'type' in request.GET:
-        types = request.GET['type']
-    if 'group' in request.GET:
-        groups = request.GET['group']
-
-
-    context = {
-        'papers': filter_by_date_type_group(request, search_paper(request)),
-        'groups': Group.objects.all(),
-        'type': PaperType.objects.all(), 
-        'selected_search': searches,
-        'selected_date': dates,
-        'selected_type': types,
-        'selected_group': groups
-    }
-    
-    return render(request, 'paper.html', context)
-#
-
-
-def reports(request):
- 
-    context = reports_context(request)
-
-    return render(request, 'reports.html', context)
-
-def reports_context(request):
-    startdate_present = False
-    enddate_present = False
-    group_present = False
-    university_present = False
-
-    startdate = '2000-01-01'
-    enddate = str(date.today())  
-    group = ''
-    university = ''
-
-
-    context = {
-        
-        'startdate': startdate,
-        'enddate': enddate,
-        'unis': University.objects.all(),
-        'groups': Group.objects.all(),
-        'type': PaperType.objects.all(),
-   
-    }
-    
-    if 'startdate' in request.GET:
-        if request.GET['startdate'] != '':
-            startdate_present = True
-            startdate = request.GET['startdate']      
-    if 'enddate' in request.GET:
-        if request.GET['enddate'] != '':
-            enddate_present = True
-            enddate = request.GET['enddate']
-      
-    if 'group' in request.GET:
-       
-        if request.GET['group'] != '':
-            group_present = True
-            group = request.GET['group']          
-    
-    if 'university' in request.GET:
-        if request.GET['university'] != '':
-            university_present = True
-            university = request.GET['university']
-
-    if group_present == False and university_present == False:
-        if startdate_present == True and enddate_present ==False:
-            context['startdate'] = startdate
-        elif startdate_present == True and enddate_present == True:
-            context['startdate'] = startdate
-            context['enddate'] = enddate
-        elif startdate_present ==False and enddate_present ==True:
-            context['enddate'] = enddate
-
-        context['total_number_of_users'] = User.objects.filter(date_joined__range = [startdate, enddate]).count()
-        context['total_number_of_universities'] = University.objects.filter(created__range = [startdate, enddate]).count()
-        context['total_number_of_groups'] = Group.objects.filter(created__range = [startdate, enddate]).count()
-        context['total_number_of_publications'] = Paper.objects.filter(created__range = [startdate, enddate]).count()
-
-        each_university_users_dict = {}
-        each_university_publications_dict = {}
-        each_university_masters_dict = {}
-        each_university_phd_dict = {}
-        each_university_researchers_dict = {}
-        each_university_graduates_dict = {}
-      
-
-        all_unis = University.objects.filter(created__range = [startdate, enddate])
-
-        for each_uni in all_unis:
-            
-            each_university_users_dict[each_uni.name] = User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate]).count()
-            each_university_publications_dict[each_uni.name]= Paper.objects.filter(group__university__name__contains = each_uni, created__range = [startdate, enddate]).count()
-            each_university_masters_dict[each_uni.name]= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'masters').count()
-            each_university_phd_dict[each_uni.name]= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'phd').count()
-            each_university_researchers_dict[each_uni.name]= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'Researcher').count()   
-            each_university_graduates_dict[each_uni.name]= User.objects.filter(group__university__name__contains = each_uni, date_joined__range = [startdate, enddate], student_role__name__contains = 'graduate').count()            
-
-        context['each_university_users_dict'] = (str(each_university_users_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['each_university_publications_dict'] = (str(each_university_publications_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['each_university_masters_dict'] = (str(each_university_masters_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['each_university_phd_dict'] = (str(each_university_phd_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['each_university_researchers_dict'] = (str(each_university_researchers_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['each_university_graduates_dict'] = (str(each_university_graduates_dict).replace("{","").replace("}", "")).replace(',', '\n')  
-
-    elif group_present == True and university_present == False:
-  
-        if startdate_present == True and enddate_present ==False:
-            context['startdate'] = startdate
-        elif startdate_present == True and enddate_present == True:
-            context['startdate'] = startdate
-            context['enddate'] = enddate
-        elif startdate_present ==False and enddate_present ==True:
-            context['enddate'] = enddate
-        context['total_number_of_users_in_group'] = User.objects.filter(date_joined__range = [startdate, enddate],  group__name__contains = group).count()
-
-        group_publications_dict = {}
-        group_masters_dict = {}
-        group_phd_dict = {}
-        group_researchers_dict = {}
-        group_graduates_dict = {}
-
-        group_publications_dict[group] =  Paper.objects.filter(group__name__contains = group, created__range = [startdate, enddate]).count()
-        group_masters_dict[group] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'masters').count()
-        group_phd_dict[group] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'phd').count()
-        group_researchers_dict[group] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'Researcher').count()
-        group_graduates_dict[group] = User.objects.filter(group__name__contains = group, date_joined__range = [startdate, enddate], student_role__name__contains = 'graduate').count()
-
-        context['group_publications_dict'] = (str(group_publications_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['group_masters_dict'] = (str(group_masters_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['group_phd_dict'] = (str(group_phd_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['group_researchers_dict'] = (str(group_researchers_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['group_graduates_dict'] = (str(group_graduates_dict).replace("{","").replace("}", "")).replace(',', '\n')
-
-    elif  group_present == False and university_present == True:
-        if startdate_present == True and enddate_present ==False:
-            context['startdate'] = startdate
-        elif startdate_present == True and enddate_present == True:
-            context['startdate'] = startdate
-            context['enddate'] = enddate
-        elif startdate_present ==False and enddate_present ==True:
-            context['enddate'] = enddate
-        context['total_number_of_users_in_uni'] = User.objects.filter(date_joined__range = [startdate, enddate], university__name__contains = university ).count()
-       
-        context['total_number_of_groups'] = Group.objects.filter(created__range = [startdate, enddate], university__name__contains = university).count()
-        context['total_number_of_publications'] = Paper.objects.filter(created__range = [startdate, enddate], group__university__name__contains = university).count()
-
-
-        each_group_users_dict = {}
-        each_group_publications_dict = {}
-        each_group_masters_dict = {}
-        each_group_phd_dict = {}
-        each_group_researchers_dict = {}
-        each_group_graduates_dict = {}
-      
-
-        all_groups_in_uni = Group.objects.filter(created__range = [startdate, enddate], university__name__contains = university )
-
-        for each_group in all_groups_in_uni:
-            
-            each_group_users_dict[each_group.name] = User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate]).count()
-            each_group_publications_dict[each_group.name]= Paper.objects.filter(group__name__contains = each_group, created__range = [startdate, enddate]).count()
-            each_group_masters_dict[each_group.name]= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'masters').count()
-            each_group_phd_dict[each_group.name]= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'phd').count()
-            each_group_researchers_dict[each_group.name]= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'Researcher').count()   
-            each_group_graduates_dict[each_group.name]= User.objects.filter(group__name__contains = each_group, date_joined__range = [startdate, enddate], student_role__name__contains = 'graduate').count()            
-
-        context['each_group_users_dict'] = (str(each_group_users_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['each_group_publications_dict'] = (str(each_group_publications_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['each_group_masters_dict'] = (str(each_group_masters_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['each_group_phd_dict'] = (str(each_group_phd_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['each_group_researchers_dict'] = (str(each_group_researchers_dict).replace("{","").replace("}", "")).replace(',', '\n')
-        context['each_group_graduates_dict'] = (str(each_group_graduates_dict).replace("{","").replace("}", "")).replace(',', '\n')
-     
-    context['selected_group'] = group
-    context['selected_university'] = university
-    return context
-
-##needs work
-def generate_pdf(request):
-    
-  
-    template_path = 'reports.html'
-
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'filename="report.pdf"'
-    
-    context = reports_context(request)
-    print('request start')
-    print(request.GET)
-    print('context strt')
-    print(context)
-    # find the template and render it.
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-       html, dest=response)
-    # if error then show some funny view
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
-
-# searching 
-def normalize_query(query_string,
-                    findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
-                    normspace=re.compile(r'\s{2,}').sub):
-    ''' Splits the query string in invidual keywords, getting rid of unecessary spaces
-        and grouping quoted words together.
-        Example:
-
-        >>> normalize_query('  some random  words "with   quotes  " and   spaces')
-        ['some', 'random', 'words', 'with quotes', 'and', 'spaces']
-
-    '''
-    return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)]
-
-def get_query(query_string, search_fields):
-    ''' Returns a query, that is a combination of Q objects. That combination
-        aims to search keywords within a model by testing the given search fields.
-
-    '''
-    query = None # Query to search for every search term
-    terms = normalize_query(query_string)
-    for term in terms:
-        or_query = None # Query to search for a given term in each field
-        for field_name in search_fields:
-            q = Q(**{"%s__icontains" % field_name: term})
-            if or_query is None:
-                or_query = q
-            else:
-                or_query = or_query | q
-        if query is None:
-            query = or_query
-        else:
-            query = query & or_query
-    return query
-
-def search_paper(request):
-    
-    query_string = ''
-    found_entries = None
-    if ('q' in request.GET) and request.GET['q'].strip():
-        query_string = request.GET['q']
-
-        entry_query = get_query(query_string, ['title', 'description','author'])
-        
-        paper_list= Paper.objects.filter(entry_query)
-        return paper_list
-    elif ('search' in request.GET) and request.GET['search'].strip():
-        query_string = request.GET['search']
-
-        entry_query = get_query(query_string, ['title', 'description','author'])
-
-        paper_list= Paper.objects.filter(entry_query)
-        return paper_list
-    else:
-        display_paper = Paper.objects.all()
-        return display_paper
-
-def search(request):
-    
-    query_string = ''
-    found_entries = None
-    if ('search' in request.GET) and request.GET['search'].strip():
-        query_string = request.GET['search']
-
-        entry_query = get_query(query_string, ['title', 'description','author'])
-        entry_query_2 = get_query(query_string, ['username', 'first_name', 'last_name'])
-        entry_query_3 = get_query(query_string, ['name'])
-        paper_list= Paper.objects.all().filter(entry_query)
-        people_list = User.objects.all().filter(entry_query_2)
-        group_list = Group.objects.all().filter(entry_query_3)
-        context = {
-            'papers':paper_list,
-            'people': people_list,
-            'groups' : group_list
-            }
-        return render(request,'search.html',context )
-    else:
-        display_paper = Paper.objects.all()
-        display_people = User.objects.all()
-        group_list = Group.objects.all()
-        context = {
-            'papers':display_paper,
-            'people': display_people,
-            'groups' : group_list
-            }
-        return render(request, 'search.html', context)
-
-class CreateContactUs(CreateView):
-    form_class = ContactForm
-    model = Contact
-    template_name = 'contact_form.html'
-    success_url = reverse_lazy('signin')
-
-    def form_valid(self, form):
-        self.object = form.save(commit = False)
-        self.object.save()
-        return super().form_valid(form)
-
-
-class ListMessages(ListView):
-    model = Contact
-    template_name = 'contact_us_list.html'
-
-    def get_queryset(self):
-        return Contact.objects.filter(date_posted__lt = timezone.now()).order_by('-date_posted')

@@ -7,7 +7,7 @@ urlpatterns = [
     path('contact/',views.contact, name = 'contact'),
     path('people/',views.people, name = 'people'),
     path('research/', views.research, name = 'research'),
-    path('logged/',views.login1, name = 'loggedin'),
+    path('logged/',views.loginView, name = 'loggedin'),
     path('logout/',views.logoutView, name = 'loggedout'),
 
 
@@ -36,16 +36,16 @@ urlpatterns = [
     path('search/', views.search, name = 'search'),
 
 #admin
-    path('aluser/', views.ListUserView.as_view(), name='aluser'),
-    path('alvuser/<int:pk>', views.ALViewUser.as_view(), name='alvuser'),
+   
+    
   
 #dashboard
    
     path('listusers/', views.dashboardManageUsers, name= 'listusers'),
     path('dashboard/',views.dashboardView, name = 'dashboard'),
     path('listgroups/', views.dashboardManageGroups, name ='listgroups'),   
-    path('aegroup/<int:pk>', views.AEditGroup.as_view(), name='aegroup'),
-    path('aeuser/<int:pk>', views.AEditUser.as_view(), name='aeuser'),
+    path('aegroup/<int:pk>', views.EditGroup.as_view(), name='aegroup'),
+    path('aeuser/<int:pk>', views.EditUserProfile.as_view(), name='aeuser'),
     path('addstu/', views.createStudent, name='addstu'),
     path('addGA/', views.createGroupAdmin, name='addGA'),
     path('addUA/', views.createUniAdmin, name='addUA'),
@@ -58,13 +58,13 @@ urlpatterns = [
     path('createRUser/', views.create_Researcher, name= 'createRUser'),
     path('change_password', views.passwordChange, name='change_password'),
     path('manageusersearch/',views.manageUserFilter, name ='manageusersearch'), 
-    path('addUni/', views.addUni, name= 'addUni'),
+    path('addUni/', views.addUniversity, name= 'addUni'),
     path('addUnidetails,', views.addUnidetails, name= 'addUnidetails'),
     path('editpaper/<int:pk>', views.EditPaper.as_view(),name='editPaper'),
     path('list_chats/', views.ListMessages.as_view(), name = 'contact_list'),
     path('managepublications/', views.managePublications, name ='managepublications'),
     path('activate/', views.activate_account, name= 'activate'),
     path('deactivate/', views.deactivate_account, name= 'deactivate'),
-    path('Deletepaper/<int:pk>', views.PDeleteView.as_view(), name='delpaper'),
+    path('Deletepaper/<int:pk>', views.PublicationsDeleteView.as_view(), name='delpaper'),
     
 ]
