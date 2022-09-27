@@ -3,7 +3,7 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>About page</title>
+    <title>Dashboard</title>
     <!-- CSS only -->
 
 
@@ -172,7 +172,19 @@
          </div>
        </div>
 	
-{% block body %} <p>Welcome, you are logged as a {{Role}}</p>{% endblock %}
+{% block body %} <p>Welcome, you are logged as a {{Role}}</p>
+
+
+
+
+
+
+
+
+
+
+
+{% endblock %}
        		<!-- Wrapper -->
            	<div class="wrapper">
 
@@ -212,35 +224,27 @@
        					<li>
        						<a href="{% url 'managepublications' %}"><i class="fas fa-book"></i> Manage Publications</a>
        					</li>
- {% if Role == 'UniAdmin' or Role == 'CAIRAdmin' or Role == 'Groupleader'%}
+ {% if Role == 'UniAdmin' or Role == 'CAIRAdmin' or Role == 'GroupAdmin'%}
                 <li>
        						<a  href="{% url 'listgroups' %}"><i class="fas fa-users"></i> Manage Groups</a>
        					</li>
+       					<li>
+       						<a href="{% url 'reports' %}"><i class="fas fa-book"></i> Reports</a>
+       					</li>
+       					<li>
+       						<a href="{% url 'contact_list' %}"><i class="fas fa-book"></i>View Messages</a>
+       					</li>
+       					
+       					
 {% endif%}
-       					<li>
-       						<a href="#"><i class="fas fa-pencil-alt"></i> Contact us</a>
+       					
 
-
-       					<li>
-
-       						<a href="#otherSections" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle" role="button" aria-controls="otherSections">
-       							<i class="fas fa-sync"></i>Other sections
-       						</a>
-       						<ul class="collapse list-unstyled" id="otherSections">
-       							<li>
-       								<a class="scroll-link" href="#">About Us</a>
-       							</li>
-
-       						</ul>
+       						
+       						
        					</li>
        				</ul>
 
-       				<div class="to-top">
-       					<a class="btn btn-primary btn-customized-3" href="#" role="button">
-       	                    <i class="fas fa-arrow-up"></i> Top
-       	                </a>
-       				</div>
-
+       			
        			</nav>
        			<!-- End sidebar -->
 
