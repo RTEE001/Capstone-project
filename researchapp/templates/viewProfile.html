@@ -46,7 +46,7 @@
                     {% endfor %}
                     <img class="img-fluid" alt="100%x280"
 
-                                             src= {% if object.uni.image %}{{ object.uni.image.url }}{% else %} {% static 'media/logo.svg' %}{% endif %} style="width:100px;height:100px">
+                                             src= {% if object.image %}{{ object.image.url }}{% else %} {% static 'media/logo.svg' %}{% endif %} style="width:100px;height:100px">
 
  <div class="row">
         <div class="col-12">
