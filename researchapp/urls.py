@@ -1,3 +1,11 @@
+"""
+Django runs through each URL pattern, in order, and stops at the first one that matches the requested URL, 
+matching against path_info . 
+Once one of the URL patterns matches, Django imports and calls the given view, 
+which is a Python function (or a class-based view)
+"""
+
+
 from django.urls import path
 from . import views
 
@@ -51,9 +59,9 @@ urlpatterns = [
     path('addUA/', views.createUniAdmin, name='addUA'),
     path('addCA/', views.createCAIRAdmin, name='addCA'),
     path('addR/', views.createResearcher, name='addR'),
-    path('createStuUser/', views.create_stuUser, name= 'createStuUser'),
-    path('createGAUser/', views.create_grpAdmin, name= 'createGAUser'),
-    path('createUAUser/', views.create_uniAdmin, name= 'createUAUser'),
+    path('createStuUser/', views.create_studentUser, name= 'createStuUser'),
+    path('createGAUser/', views.create_groupAdmin, name= 'createGAUser'),
+    path('createUAUser/', views.create_universityAdmin, name= 'createUAUser'),
     path('createCAUser/', views.create_CAIRAdmin, name= 'createCAUser'),
     path('createRUser/', views.create_Researcher, name= 'createRUser'),
     path('change_password', views.passwordChange, name='change_password'),
