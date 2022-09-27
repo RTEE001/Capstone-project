@@ -22,6 +22,22 @@ from xhtml2pdf import pisa
 
 from datetime import date
 
+def deactivate_account(request):
+    a=request.GET['key']
+    print('keyr'+str(a))
+    user = User.objects.get(id=a)
+    user.is_active=False
+    user.save()
+
+    return redirect('listusers')
+
+def activate_account(request):
+    a=request.GET['keys']
+    print('keyr'+str(a))
+    user = User.objects.get(id=a)
+    user.is_active=True
+    user.save()
+    return redirect('listusers')
 
 def managePublications(request):
     searches = ''
@@ -65,6 +81,13 @@ def managePublications(request):
         'selected_group': group
     }
     return render(request, 'manageownpapers.html', context )
+
+class PDeleteView(DeleteView):
+	model = Paper
+	template_name = 'confirm_delete.html'
+	success_url = reverse_lazy('managepublications')
+	success_message = 'Data was deleted successfully'
+
 
 class ALViewUser(DetailView):
     model = User
@@ -926,19 +949,24 @@ def search(request):
 
         entry_query = get_query(query_string, ['title', 'description','author'])
         entry_query_2 = get_query(query_string, ['username', 'first_name', 'last_name'])
-        paper_list= Paper.objects.filter(entry_query)
-        people_list = User.objects.filter(entry_query_2)
+        entry_query_3 = get_query(query_string, ['name'])
+        paper_list= Paper.objects.all().filter(entry_query)
+        people_list = User.objects.all().filter(entry_query_2)
+        group_list = Group.objects.all().filter(entry_query_3)
         context = {
             'papers':paper_list,
-            'people': people_list
+            'people': people_list,
+            'groups' : group_list
             }
         return render(request,'search.html',context )
     else:
         display_paper = Paper.objects.all()
         display_people = User.objects.all()
+        group_list = Group.objects.all()
         context = {
             'papers':display_paper,
-            'people': display_people
+            'people': display_people,
+            'groups' : group_list
             }
         return render(request, 'search.html', context)
 

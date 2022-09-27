@@ -61,5 +61,8 @@ urlpatterns = [
     path('editpaper/<int:pk>', views.EditPaper.as_view(),name='editPaper'),
     path('list_chats/', views.ListMessages.as_view(), name = 'contact_list'),
     path('managepublications/', views.managePublications, name ='managepublications'),
+    path('activate/', views.activate_account, name= 'activate'),
+    path('deactivate/', views.deactivate_account, name= 'deactivate'),
+    path('Deletepaper/<int:pk>', views.PDeleteView.as_view(), name='delpaper'),
     
 ]

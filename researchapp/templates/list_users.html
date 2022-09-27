@@ -109,14 +109,20 @@
              
         </td>
         <td>
-          <form method="GET" action="{% url 'change_password' %}">
+        {%if user.is_active == True%}
+          <form method="GET" action="{% url 'deactivate' %}">
             {% csrf_token %}
   
     <input type="hidden" name="key" value="{{user.pk}}" />
     
     <button type="submit" name="ID" class="btn btn-primary">Deactivate</button>
   
-</form></a></td>
+</form>{%else%}<form method="GET" action="{% url 'activate' %}">
+            {% csrf_token %}
+  
+    <input type="hidden" name="keys" value="{{user.pk}}" />
+    
+    <button type="submit" name="ID" class="btn btn-primary">activate</button></form></td>{% endif %}
                                 </tr>
                             
                              
