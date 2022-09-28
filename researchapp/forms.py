@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from pickle import TRUE
 from django.forms import ModelForm
 from django import forms
-from researchapp.models import Contact, Group, Paper, StudentRole, University
+from researchapp.models import Contact, Group, Paper, StudentRole, University, PaperType, Role
 from django.core.exceptions import ValidationError     
 from datetime import date
 from django.contrib.auth import get_user_model
@@ -84,3 +84,24 @@ class ContactForm(forms.ModelForm):
     class Meta:
         model = Contact
         fields = ('__all__')
+
+
+class CreateGroupForm(forms.ModelForm):
+    class meta:
+        model = Group
+        fields = '__all__'
+
+class CreateUniForm(forms.ModelForm):
+    class meta:
+        model = University
+        fields = '__all__'
+
+class CreatePaperTypeForm(forms.ModelForm):
+    class meta:
+        model = PaperType
+        fields = '__all__'
+
+class CreateRoleForm(forms.ModelForm):
+    class meta:
+        model = Role
+        fields = '__all__'

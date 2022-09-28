@@ -15,7 +15,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.views import generic
 from django.views.generic import  DetailView, UpdateView, CreateView, DeleteView, ListView
-from .forms import ContactForm, UserForm
+from .forms import ContactForm, CreatePaperTypeForm, UserForm, CreateGroupForm, CreateUniForm, CreatePaperTypeForm, CreateRoleForm
 from django.http import HttpResponse
 import re
 from django.db.models import Q
@@ -28,6 +28,7 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 from datetime import date
 import os
+from django.contrib.auth.decorators import login_required
 from dotenv import load_dotenv
 #Dashboard
 
@@ -108,6 +109,7 @@ This function renders all publication that are editable by a user
 depending on the type of user and allows filtering according 
 to search, date, types of publicatins and groups
 '''
+@login_required
 def managePublications(request):
     searches = ''
     dates= ''
@@ -155,7 +157,8 @@ def managePublications(request):
 '''
 This class deletes publications
 '''
-class PublicationsDeleteView(DeleteView):
+
+class PublicationsDeleteView(LoginRequiredMixin,DeleteView):
 	model = Paper
 	template_name = 'confirm_delete.html'
 	success_url = reverse_lazy('managepublications')
@@ -167,7 +170,8 @@ This Class allows user to user edit profile informations and accounts
 with supervisor preveliges to edit other users
 
 '''
-class EditUserProfile(generic.UpdateView):
+
+class EditUserProfile(LoginRequiredMixin,generic.UpdateView):
     model = User
     form_class = UserForm
   
@@ -197,7 +201,8 @@ class EditUserProfile(generic.UpdateView):
 '''
 This class allows the user to edit publication details
 '''
-class EditPaper(generic.UpdateView):
+
+class EditPaper(LoginRequiredMixin,generic.UpdateView):
     model = Paper
     form_class = UploadForm
     template_name ='upload.html'
@@ -220,7 +225,8 @@ class EditPaper(generic.UpdateView):
 
 #Dashboard
 '''This class allows users with manage group previleges to edit group information'''
-class EditGroup(UpdateView): 
+
+class EditGroup(LoginRequiredMixin,UpdateView): 
     model = Group
     form_class = GroupForm
     template_name = 'GroupEdit.html'
@@ -236,6 +242,7 @@ class EditGroup(UpdateView):
 #Dashboard
 
 '''This function allow user with supervisor previleges to modify child user passwords'''
+@login_required
 def passwordChange(request):
     if request.method == 'POST' and 'psw' in request.POST :
         if 'key' in request.POST:
@@ -294,6 +301,7 @@ def research(request):
   
 #shared
 '''This function allows logged-in user to logout'''
+@login_required
 def logoutView(request):
     logout(request)
     return redirect('home')
@@ -305,7 +313,8 @@ def signin(request):
 
 #Dashboard
 '''This class allows logged in users to upload publications'''
-class upload_paper(CreateView):
+
+class upload_paper(LoginRequiredMixin,CreateView):
     model = Paper
     form_class = UploadForm
     template_name ='upload.html'
@@ -350,8 +359,8 @@ def loginView(request):
     if request.method == 'POST':
        
         try:
-            m = User.objects.get(username=request.POST['username'])
-            if m.check_password(request.POST['password']):
+            user = User.objects.get(username=request.POST['username'])
+            if user.check_password(request.POST['password']):
             
                 request.session['username'] = request.POST['username']
                 Auth_user = authenticate(request, username=request.POST['username'], password=request.POST['password'])
@@ -392,6 +401,7 @@ def getRole(request):
 
 #dashboard
 '''This function renders the dashboard page'''
+@login_required
 def dashboardView(request):
     return render(request,'dashboard.html', filterUsersbyrole(request))
 
@@ -436,50 +446,52 @@ def getFilteredUsers(request):
     return users
 #dashboard
 '''This function renders page to manage child users'''
+@login_required
 def dashboardManageUsers(request):
     if getRole(request)=='student':
         return redirect('dashboard')
     return render(request, 'list_users.html', filterUsersbyrole(request))
 #dashboard
 '''This function renders page to manage groups'''
+@login_required
 def dashboardManageGroups(request):
     return render(request, 'list_groups.html', filterUsersbyrole(request))
-
+@login_required
 def createStudent(request):
     if getRole(request)=='student':
         return redirect('dashboard')
     return render(request, 'addStudent.html', filterUsersbyrole(request))
-
+@login_required
 def createResearcher(request):
     if getRole(request)=='student' or getRole(request)=='Researcher' :
         return redirect('dashboard')
     return render(request, 'addResearcher.html', filterUsersbyrole(request))
     
 
-
+@login_required
 def createGroupAdmin(request):
     if getRole(request)=='student' or getRole(request)=='Researcher' :
         return redirect('dashboard')
     return render(request, 'addGroupAdmin.html', filterUsersbyrole(request))
-
+@login_required
 def createGroupLeader(request):
     if getRole(request)=='student' or getRole(request)=='Researcher' :
         return redirect('dashboard')
     return render(request, 'addGroupLeader.html', filterUsersbyrole(request))
 
-
+@login_required
 def createUniAdmin(request):
     if getRole(request)=='CAIRAdmin' :    
         return render(request, 'addUniAdmin.html', filterUsersbyrole(request))
     else:
         return redirect('dashboard')
-
+@login_required
 def createCAIRAdmin(request):
     if getRole(request)=='CAIRAdmin' :  
         return render(request, 'addCAIRAdmin.html', filterUsersbyrole(request))
     else:
         return redirect('dashboard')
-
+@login_required
 def create_stuUser(request):
     if getRole(request)=='student':
         return redirect('dashboard')
@@ -505,7 +517,7 @@ def create_stuUser(request):
                 email_notif(email)
                 
     return redirect('listusers')
-
+@login_required
 def create_grpAdmin(request):
     if getRole(request)=='student' or getRole(request)=='Researcher' :
         return redirect('dashboard')
@@ -527,7 +539,7 @@ def create_grpAdmin(request):
                 user.save()
                 email_notif(email)
     return redirect('listusers')
-
+@login_required
 def create_grpLeader(request):
     if getRole(request)=='student' or getRole(request)=='Researcher' :
         return redirect('dashboard')
@@ -549,7 +561,7 @@ def create_grpLeader(request):
                 user.save()
                 email_notif(email)
     return redirect('listusers')
-
+@login_required
 def create_uniAdmin(request):
     if getRole(request)=='CAIRAdmin' :
         if request.method == 'POST':
@@ -564,7 +576,7 @@ def create_uniAdmin(request):
                 email_notif(email)
         return redirect('listusers')
     return redirect('dashboard')
-
+@login_required
 def create_CAIRAdmin(request):
     if getRole(request)=='CAIRAdmin' :
         if request.method == 'POST':
@@ -579,7 +591,7 @@ def create_CAIRAdmin(request):
                 email_notif(email)
         return redirect('listusers')
     return redirect ('dashboard')
-
+@login_required
 def create_Researcher(request):
     if request.method == 'POST':
             first_name=request.POST['First']
@@ -601,7 +613,9 @@ def create_Researcher(request):
                 email_notif(email)
     return redirect('listusers')
     #dashboard
+
 '''This function saves universtity details in the database'''
+@login_required
 def addUnidetails(request):
     if request.method == 'POST':
         form = (request.POST, request.FILES)
@@ -614,11 +628,13 @@ def addUnidetails(request):
     return redirect('addUni')
     #dashboard
 '''This funtion renders university upload form'''
+@login_required
 def addUniversity(request):
     return render(request, 'addUni.html', filterUsersbyrole(request))
 #dashboard
 '''This function allow search child users by name from dashboard and filter users 
     according to particular type of user logged in'''
+@login_required
 def filter_by_nameDashboard(request):
     query_string = ''
     if ('query' in request.GET) and request.GET['query']!="":
@@ -675,7 +691,7 @@ def filter_by_category(request, user_list):
 
 #dashboard
 '''This function renders page where a supervisor can manage other users  '''
-
+@login_required
 def manageUserFilter(request):
     
     found_entries = None
@@ -819,6 +835,7 @@ class AViewGroupProfile(DetailView):
 This function provides a page for the student details to be entered
 The details are then passed to create_student_user to be stored in the database
 '''
+@login_required
 def createStudent(request):
     if getRole(request)=='student':
         return redirect('dashboard')
@@ -848,7 +865,7 @@ def email_notif(email_address, username, password):
     smtp.sendmail(SENDER_EMAIL_ADDRESS,email_address, msg.as_string())
     smtp.quit()
 
-
+@login_required
 def create_studentUser(request):
     if getRole(request)=='student':
         return redirect('dashboard')
@@ -881,6 +898,7 @@ def create_studentUser(request):
 This function provides a page for the researcher details to be entered
 The details are then passed to create_Researcher to be stored in the database
 '''
+@login_required
 def createResearcher(request):
     if getRole(request)=='student' or getRole(request)=='Researcher' :
         return redirect('dashboard')
@@ -889,6 +907,7 @@ def createResearcher(request):
 This function creates a researcher and saves it to the database
 The researcher is registered to the database as they are saved
 '''
+@login_required
 def create_Researcher(request):
     if request.method == 'POST':
             first_name=request.POST['First']
@@ -917,6 +936,7 @@ def create_Researcher(request):
 This function provides a page for the group admin details to be entered
 The details are then passed to create_groupAdmin to be stored in the database
 '''
+@login_required
 def createGroupAdmin(request):
 
     if getRole(request)=='student' or getRole(request)=='Researcher' :
@@ -928,6 +948,7 @@ def createGroupAdmin(request):
 This function creates a group admin and saves it to the database
 The group admin is registered to the database as they are saved
 '''
+@login_required
 def create_groupAdmin(request):
     if getRole(request)=='student' or getRole(request)=='Researcher' :
         return redirect('dashboard')
@@ -950,7 +971,7 @@ def create_groupAdmin(request):
                 email_notif(email, username, request.POST['psw'] )
     return redirect('listusers')
 
-
+@login_required
 def create_groupLeader(request):
     if getRole(request)=='student' or getRole(request)=='Researcher' :
         return redirect('dashboard')
@@ -978,6 +999,7 @@ def create_groupLeader(request):
 This function provides a page for the university admin details to be entered
 The details are then passed to create_uniAdmin to be stored in the database
 '''
+@login_required
 def createUniAdmin(request):
     if getRole(request)=='CAIRAdmin' :    
         return render(request, 'addUniAdmin.html', filterUsersbyrole(request))
@@ -988,6 +1010,7 @@ def createUniAdmin(request):
 This function creates a group admin and saves it to the database
 The university admin is registered to the database as they are saved
 '''
+@login_required
 def create_uniAdmin(request):
     if getRole(request)=='CAIRAdmin' :
         if request.method == 'POST':
@@ -1007,6 +1030,7 @@ def create_uniAdmin(request):
 This function provides a page for the cair admin details to be entered
 The details are then passed to createCAIRAdmin to be stored in the database
 '''
+@login_required
 def create_CAIRAdmin(request):
     if getRole(request)=='CAIRAdmin' :
         if request.method == 'POST':
@@ -1027,6 +1051,7 @@ def create_CAIRAdmin(request):
 This function creates a group admin and saves it to the database
 The cair admin is registered to the database as they are saved
 '''
+@login_required
 def createCAIRAdmin(request):
     if getRole(request)=='CAIRAdmin' :  
         return render(request, 'addCAIRAdmin.html', filterUsersbyrole(request))
@@ -1037,6 +1062,7 @@ def createCAIRAdmin(request):
 This function provides a page for the university details to be entered
 The details are then passed to addUni to be stored in the database
 '''
+@login_required
 def addUnidetails(request):
     if request.method == 'POST':
         form = (request.POST, request.FILES)
@@ -1052,6 +1078,7 @@ def addUnidetails(request):
 This function creates a university and saves it to the database
 The unoversity is registered to the database as they are saved
 '''
+@login_required
 def addUni(request):
     return render(request, 'addUni.html', filterUsersbyrole(request))
 
@@ -1220,6 +1247,7 @@ def reports_context(request):
 '''
 This function provides the view of the report to the user
 '''
+@login_required
 def reports(request):
     context = reports_context(request)
     return render(request, 'reports.html', context)

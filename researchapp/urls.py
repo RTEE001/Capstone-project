@@ -34,7 +34,8 @@ urlpatterns = [
     path('search_paper/', views.search_paper, name="search_paper"),
     path('upload/', views.upload_paper.as_view(), name = 'upload'),
     path('search/', views.search, name = 'search'),
-  
+
+ 
 #dashboard
    
     path('listusers/', views.dashboardManageUsers, name= 'listusers'),
