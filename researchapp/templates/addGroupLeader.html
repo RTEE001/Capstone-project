@@ -58,7 +58,7 @@ a {
 }
 {% endblock %}
 {% block body%}
- <form action="{% url 'createGAUser' %}" method = "POST">
+ <form action="{% url 'createGLUser' %}" method = "POST">
  {% csrf_token %}
   <div class="container">
     <h1>Register</h1>

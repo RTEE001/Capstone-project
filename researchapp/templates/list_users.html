@@ -20,12 +20,13 @@
                     <i class="fas fa-table"></i>
                     List Of Users
                     <a  class="btn btn-sm btn-success" href="{% url 'addstu'%}" style="padding: 8px; float: right; background-color: blue; color: white;">Add Student</a>
-                    {% if Role == 'GroupAdmin' or Role == 'UniAdmin' or Role == 'CAIRAdmin'%}
+                    {% if Role == 'GroupAdmin' or Role == 'GroupLeader' or Role == 'UniAdmin' or Role == 'CAIRAdmin'%}
                     <a  class="btn btn-sm btn-success" href="{% url 'addR' %}" style="padding: 8px; float: right; background-color: blue; color: white;">Add Researcher</a>
                     {% else %}
                     {% endif %}
                     {% if Role == 'UniAdmin' or Role == 'CAIRAdmin' %}
                     <a  class="btn btn-sm btn-success" href="{% url 'addGA' %}" style="padding: 8px; float: right; background-color: blue; color: white;">Add Group Admin</a>
+                    <a  class="btn btn-sm btn-success" href="{% url 'addGL' %}" style="padding: 8px; float: right; background-color: blue; color: white;">Add Group Leader</a>
                     {% else %}
                     {% endif %}
                      {% if Role == 'CAIRAdmin' %}
@@ -102,7 +103,7 @@
                                     </td>
                                     <td>{{ user.email }}</td>
                                     <td>
-                <a href="{% url 'avprofile' user.pk %}"><button type="button" class="btn btn-primary"> View</button></a>
+                <a href="{% url 'dvprofile' user.pk %}"><button type="button" class="btn btn-primary"> View</button></a>
                  </td>
                 <td>
                 <a href="{% url 'aeuser' user.pk %}"><button type="button" class="btn btn-warning"> Edit</button></a>

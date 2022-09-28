@@ -129,7 +129,7 @@ def managePublications(request):
     elif  getRole(request)=="UniAdmin":
         displayPapers=filter_by_date_type_group(request, search_paper(request)).filter(group__university__name__iexact=request.user.university)
         groups = Group.objects.all().filter(university__name__iexact=request.user.university)
-    elif getRole(request)=="GroupAdmin":
+    elif getRole(request)=="GroupAdmin" or getRole(request)=="GroupLeader":
         displayPapers=filter_by_date_type_group(request, search_paper(request)).filter(group__name__iexact=request.user.university)
         groups = Group.objects.all().filter(name__iexact=request.user.group)
     else :
@@ -377,6 +377,8 @@ def getRole(request):
         elif slugify(request.user.role)=="groupadmin":
             return 'GroupAdmin'
 
+        elif slugify(request.user.role) == 'groupleader':
+            return 'GroupLeader'
         elif slugify(request.user.role)=="uniadmin":
             return 'UniAdmin'
         
@@ -400,7 +402,7 @@ This function filters groups, users and returns context according to user type
 def filterUsersbyrole(request):
     users = User.objects.all()
     groups = Group.objects.all()
-    if getRole(request)=='GroupAdmin':
+    if getRole(request)=='GroupAdmin' or getRole(request)=="GroupLeader":
         users = users.filter(group__name__icontains=request.user.group)
     elif getRole(request)=="UniAdmin":
         users = users.filter(university__name__icontains=request.user.university)
@@ -423,7 +425,7 @@ def filterUsersbyrole(request):
 def getFilteredUsers(request):
     users = User.objects.all()
     groups = Group.objects.all()
-    if getRole(request)=='GroupAdmin':
+    if getRole(request)=='GroupAdmin' or getRole(request)=="GroupLeader":
         users = users.filter(group__name__icontains=request.user.group)
     elif getRole(request)=="UniAdmin":
         users = users.filter(university__name__icontains=request.user.university)
@@ -460,6 +462,11 @@ def createGroupAdmin(request):
         return redirect('dashboard')
     return render(request, 'addGroupAdmin.html', filterUsersbyrole(request))
 
+def createGroupLeader(request):
+    if getRole(request)=='student' or getRole(request)=='Researcher' :
+        return redirect('dashboard')
+    return render(request, 'addGroupLeader.html', filterUsersbyrole(request))
+
 
 def createUniAdmin(request):
     if getRole(request)=='CAIRAdmin' :    
@@ -483,7 +490,7 @@ def create_stuUser(request):
             email=request.POST['email']
             password=request.POST['psw']
             password = make_password(password)
-            if getRole(request)=='Researcher' or getRole(request)=='GroupAdmin':
+            if getRole(request)=='Researcher' or getRole(request)=='GroupAdmin' or getRole(request)=='GroupLeader':
                 user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), university=University.objects.get(name__exact=request.user.university), group=Group.objects.get(name__exact=request.user.grp), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))
                 user.save()
                 email_notif(email)
@@ -517,6 +524,28 @@ def create_grpAdmin(request):
             else:
                 
                 user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupAdmin'), university=University.objects.get(name__exact=Group.objects.get(name__exact=request.POST['GroupCat']).university), group=Group.objects.get(name__exact=request.POST['GroupCat']))
+                user.save()
+                email_notif(email)
+    return redirect('listusers')
+
+def create_grpLeader(request):
+    if getRole(request)=='student' or getRole(request)=='Researcher' :
+        return redirect('dashboard')
+    if request.method == 'POST':
+            first_name=request.POST['First']
+            last_name=request.POST['Last']
+            username=request.POST['username']
+            email=request.POST['email']
+            password=request.POST['psw']
+            password = make_password(password)
+            
+            if getRole(request)=='UniAdmin':
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupLeader'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']))
+                user.save()
+                email_notif(email)
+            else:
+                
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupLeader'), university=University.objects.get(name__exact=Group.objects.get(name__exact=request.POST['GroupCat']).university), group=Group.objects.get(name__exact=request.POST['GroupCat']))
                 user.save()
                 email_notif(email)
     return redirect('listusers')
@@ -559,7 +588,7 @@ def create_Researcher(request):
             email=request.POST['email']
             password=request.POST['psw']
             password = make_password(password)
-            if getRole(request)=='GroupAdmin':
+            if getRole(request)=='GroupAdmin' or getRole(request)=='GroupLeader':
                 user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.user.university), group=Group.objects.get(name__exact=request.user.group))
                 user.save()
             elif getRole(request)=='UniAdmin':
@@ -721,7 +750,7 @@ def searchGroupsResult(request):
 
 #dashboard
 '''This class allow users to edit profile'''
-class AViewProfile(LoginRequiredMixin,DetailView):
+class AViewProfile(DetailView):
     model=User
     template_name = 'viewProfile.html'
     
@@ -740,9 +769,29 @@ class AViewProfile(LoginRequiredMixin,DetailView):
         context['papers'] = papers
         
         return context
+
+class DViewProfile(DetailView):
+    model=User
+    template_name = 'dviewProfile.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super(DViewProfile, self).get_context_data(**kwargs)
+        author_id = self.kwargs['pk']
+        query=""
+        query_string= User.objects.all().filter(id=author_id)
+        for i in query_string:
+            query+=str(i.first_name)+" "+str(i.last_name)
+            
+        entry_query = get_query(query, ['author', 'co_author'])
+        papers=Paper.objects.all().filter(entry_query)
+        
+       
+        context['papers'] = papers
+        
+        return context
 #dashboard
 '''This class allow users to edit group profile'''
-class AViewGroupProfile(LoginRequiredMixin,DetailView):
+class AViewGroupProfile(DetailView):
     model=Group
     template_name = 'viewGroupProfile.html'
     
@@ -755,9 +804,9 @@ class AViewGroupProfile(LoginRequiredMixin,DetailView):
             query+=str(i.name)
             
         entry_query = get_query(query, ['name'])
-        groups=Group.objects.all().filter(entry_query)       
-       
-        context['papers'] = groups       
+        papers=Paper.objects.filter(group__exact = Group.objects.get(name=query))      
+        
+        context['papers'] = papers      
         return context
 
 #shared views
@@ -811,7 +860,7 @@ def create_studentUser(request):
             email=request.POST['email']
             password=request.POST['psw']
             password = make_password(password)
-            if getRole(request)=='Researcher' or getRole(request)=='GroupAdmin':
+            if getRole(request)=='Researcher' or getRole(request)=='GroupAdmin' or getRole(request)=='GroupLeader':
                 user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), university=University.objects.get(name__exact=request.user.university), group=Group.objects.get(name__exact=request.user.grp), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))
                 user.save()
                 email_notif(email, username, request.POST['psw'] )
@@ -848,7 +897,7 @@ def create_Researcher(request):
             email=request.POST['email']
             password=request.POST['psw']
             password = make_password(password)
-            if getRole(request)=='GroupAdmin':
+            if getRole(request)=='GroupAdmin' or getRole(request)=='GroupLeader':
                 user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.user.university), group=Group.objects.get(name__exact=request.user.group))
                 user.save()
                 email_notif(email, username, request.POST['psw'] )
@@ -874,6 +923,7 @@ def createGroupAdmin(request):
         return redirect('dashboard')
     return render(request, 'addGroupAdmin.html', filterUsersbyrole(request))
 
+
 '''
 This function creates a group admin and saves it to the database
 The group admin is registered to the database as they are saved
@@ -896,6 +946,29 @@ def create_groupAdmin(request):
             else:
                 
                 user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupAdmin'), university=University.objects.get(name__exact=Group.objects.get(name__exact=request.POST['GroupCat']).university), group=Group.objects.get(name__exact=request.POST['GroupCat']))
+                user.save()
+                email_notif(email, username, request.POST['psw'] )
+    return redirect('listusers')
+
+
+def create_groupLeader(request):
+    if getRole(request)=='student' or getRole(request)=='Researcher' :
+        return redirect('dashboard')
+    if request.method == 'POST':
+            first_name=request.POST['First']
+            last_name=request.POST['Last']
+            username=request.POST['username']
+            email=request.POST['email']
+            password=request.POST['psw']
+            password = make_password(password)
+            
+            if getRole(request)=='UniAdmin':
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupLeader'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']))
+                user.save()
+                email_notif(email, username, request.POST['psw'] )
+            else:
+                
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupLeader'), university=University.objects.get(name__exact=Group.objects.get(name__exact=request.POST['GroupCat']).university), group=Group.objects.get(name__exact=request.POST['GroupCat']))
                 user.save()
                 email_notif(email, username, request.POST['psw'] )
     return redirect('listusers')
@@ -1289,7 +1362,7 @@ def filter_by_date_type_group(request, paper_list):
         if request.GET['type'] !='':
             paper_list = paper_list.filter(category__name__icontains = request.GET['type'])
     if 'group' in request.GET:
-        if request.GET['type'] !='':
+        if request.GET['group'] !='':
             paper_list = paper_list.filter(group__name__icontains = request.GET['group'])
 
     return paper_list
@@ -1360,3 +1433,20 @@ class ListMessages(ListView):
         '''This method returns the query set of the messages that are currently in the database
         The messages are ordered by date from the latest one to the oldest one'''
         return Contact.objects.filter(date_posted__lt = timezone.now()).order_by('-date_posted')
+
+
+'''
+This class renders the contact us page used by users to send messages to the admin
+'''
+class Contacts(CreateView):
+    form_class = ContactForm
+    model = Contact
+    template_name = 'contact.html'
+    success_url = reverse_lazy('home')
+
+    
+    def form_valid(self, form):
+        '''This method checks that the information passed into the form is valid'''
+        self.object = form.save(commit = False)
+        self.object.save()
+        return super().form_valid(form)
