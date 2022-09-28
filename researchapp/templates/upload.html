@@ -1,0 +1,9 @@
+{% extends 'dashboard.html' %}
+{% load static%}
+{% block body %}
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %} {{form.as_p}}
+  <input type="submit" name="upload" />
+</form>
+{% if messages%} {% for message in messages%} {{message}} {%endfor%} {%endif%}
+{%endblock%}

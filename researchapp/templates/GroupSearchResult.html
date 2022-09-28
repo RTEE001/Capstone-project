@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}People{% endblock %}
+
+{% block style %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
+rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+<!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="{% static 'css/style1.css' %}">
+    
+    <body oncontextmenu='return false' class='snippet-body'>
+{% endblock %}
+{% block ustyle %}
+ <style>
+ * {
+   box-sizing: border-box;
+ }
+
+ body {
+   font-family: Arial, Helvetica, sans-serif;
+ }
+
+ /* Float four columns side by side */
+ .column {
+   float: left;
+   width: 25%;
+   padding: 0 10px;
+ }
+
+ /* Remove extra left and right margins, due to padding */
+ .row {margin: 0 -5px;}
+
+ /* Clear floats after the columns */
+ .row:after {
+   content: "";
+   display: table;
+   clear: both;
+ }
+
+ /* Responsive columns */
+ @media screen and (max-width: 600px) {
+   .column {
+     width: 100%;
+     display: block;
+     margin-bottom: 20px;
+   }
+ }
+
+ /* Style the counter cards */
+ .card {
+   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+   padding: 96px;
+   text-align: center;
+   background-color: white;
+ }
+ </style>
+
+
+{% endblock %}
+{% block body%} 
+
+<br>
+<br>
+
+  <h2 class="featurette-heading fw-normal lh-1" style="text-align:center;" >Filtered Results</h2>
+
+      
+
+<form method="GET" action="{% url 'searchGroupResult' %}">
+                     <input class="form-control py-2 border-right-0 border" type="search" name="query" placeholder="Title contains..."{% if searchName == "" %} value="" {% else %}"{{searchName}}" value = "{{searchName}}"{% endif %}  />
+                     <select id="category" class="form-control "name="UniCat" >
+                     
+    			<option {% if selectedUni == '' %} selected{% endif %} value =""> Filter by University</option>
+    		
+    				{% for uni in UniCategory%}
+    			<option value={{uni.name}} {% if selectedUni == uni.name %} selected{% endif %}  >{{uni.name}}</option>
+   			 {% endfor %}
+   			 
+    </select>
+      
+                     <button type="submit" class="btn btn-primary">Search</button>
+                     </form>
+                     
+                          
+                    	{% if groups %}
+                            
+     <div class="row">
+     {% for group in groups %}
+       <div class="column">
+         <div class="card">
+
+           <img src="{{ group.university.image.url }}" alt ="" width="120" height="120" xmlns="http://www.w3.org/2000/svg"
+           role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false">
+
+           <p><a href="{% url 'aegroup' group.pk %}">{{group.Gname}}</a></p>
+
+
+
+         </div>
+       </div>
+{% endfor %}
+{% endif %}
+
+                          {% if is_paginated %}
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in paginator.page_range %}
+      {% if page_obj.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+      <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+  </tbody>
+</table>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+
+         <!-- /END THE FEATURETTES -->
+
+       </div>
+       <!-- /.container -->
+{% endblock %}

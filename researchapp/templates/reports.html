@@ -1,0 +1,325 @@
+{%load static%}
+
+<!DOCTYPE html>
+<head>
+    <title> Reports </title>
+</head>
+
+<body>
+    <center>
+        <h1> Reports <h1>
+
+        <hr>
+
+        <form method = 'GET'  action = "{% url 'reports' %}">
+            {% csrf_token %}
+           
+            <label for="startdate"><b>Startdate</b></label>
+            <input type="date"  name = 'startdate'  {% if startdate == ''%} value = '' {%else%} value = '{{startdate}}'{% endif%}/>
+     
+            <label for="enddate"><b>enddate</b></label>
+            <input type="date"  name = 'enddate'  {% if endtdate == ''%} value = '' {%else%} value = '{{enddate}}'{% endif%}/>
+
+            <label for="university"><b>university</b></label>
+            <select id="university" name="university" onchange = 'disableGroup(this)'>
+            <option {% if selected_university == ''%} selected {% endif%} value = ''> Select Uni</option>
+            {% for university in unis%} 
+            <option value={{university.name}} {%if selected_university == university.name%} selected {%endif%}>{{university.name}}  
+            </option>
+
+            {% endfor %}
+        </select>
+
+            <label for="groups"><b>group</b></label>
+            <select id="group" name="group" onchange = 'disableUniversity(this)'>
+                <option {% if selected_group == ''%} selected {% endif%} value = ''> Select Group</option>
+                {% for group in groups%} 
+                <option value={{group.name}} {%if selected_group == group.name%} selected {%endif%}>{{group.name}}  
+            </option>
+            {% endfor %}
+        </select>
+        <button type = 'submit'>Search</button><br>
+        <button type = 'submit' formaction = "{% url 'paperpdf' %}">Generate PDF  </button>
+
+    </form>
+
+        <script> 
+
+            function disableGroup(university)
+            {
+                if (university.value == ''){
+                    document.getElementById('group').disabled = false
+                }
+                else{
+                    document.getElementById('group').disabled = true
+                }
+            };
+
+            function disableUniversity(group)
+            {
+                if (group.value == ''){
+                    document.getElementById('university').disabled = false
+                }
+                else{
+                    document.getElementById('university').disabled = true
+                }
+            };
+        </script>
+      
+      
+        
+    
+        <p>Date Range:
+            {{startdate}} - {{enddate}}
+        </p>
+        
+        {% if selected_group == '' and selected_university == '' %}
+        <p>
+            Total number of users:
+            {{total_number_of_users}}
+        </p>
+
+        <p>
+            Total number of universities: {{total_number_of_universities|linebreaksbr}}  
+        </p>
+
+        <p>
+            Total number of groups: {{total_number_of_groups|linebreaksbr}}  
+        </p>    
+            <p>
+            Total number of publications: {{total_number_of_publications|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of users per university: {{each_university_users_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of publications per university: {{each_university_publications_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of masters students per university: {{each_university_masters_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of phd students per university: {{each_university_phd_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of researchers per university: {{each_university_researchers_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of graduates per university: {{each_university_graduates_dict|linebreaksbr}} 
+        </p>
+        {%elif select_group != '' and selected_university == ''%}
+        <p>
+            Total number of users in group: {{total_number_of_users_in_group|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of publications in group: {{group_publications_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of masters students in group: {{group_masters_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of phd students in group: {{group_phd_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of reseachers in group: {{group_researchers_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of graduates in group: {{group_graduates_dict|linebreaksbr}} 
+        </p>
+
+        {% else%}
+        <p>
+            Total number of users in university: {{total_number_of_users_in_uni|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of groups in university: {{total_number_of_groups|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of publications in university: {{total_number_of_publications|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of users per group: {{each_group_users_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of publications per group: {{each_group_publications_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of masters students per group: {{each_group_masters_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of phd students per group: {{each_group_phd_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of reseachers per group: {{each_group_researchers_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of graduates per group: {{each_group_graduates_dict|linebreaksbr}} 
+        </p>
+        {%endif%}
+        
+    </center>
+</body>
+<html>
+{%load static%}
+
+<!DOCTYPE html>
+<head>
+    <title> Reports </title>
+</head>
+
+<body>
+    <center>
+        <h1> Reports <h1>
+
+        <hr>
+
+        <form method = 'GET'  action = "{% url 'reports' %}">
+            {% csrf_token %}
+           
+            <label for="startdate"><b>Startdate</b></label>
+            <input type="date"  name = 'startdate'  {% if selected_startdate == ''%} value = '' {%else%} value = '{{selected_startdate}}'{% endif%}/>
+     
+            <label for="enddate"><b>enddate</b></label>
+            <input type="date"  name = 'enddate'  {% if selected_endtdate == ''%} value = '' {%else%} value = '{{selected_enddate}}'{% endif%}/>
+
+            <label for="university"><b>university</b></label>
+            <select id="university" name="university" onchange = 'disableGroup(this)'>
+            <option {% if selected_university == ''%} selected {% endif%} value = ''> Select Uni</option>
+            {% for university in unis%} 
+            <option value={{university.name}} {%if selected_university == university.name%} selected {%endif%}>{{university.name}}  
+            </option>
+
+            {% endfor %}
+        </select>
+
+            <label for="groups"><b>group</b></label>
+            <select id="group" name="group" onchange = 'disableUniversity(this)'>
+                <option {% if selected_group == ''%} selected {% endif%} value = ''> Select Group</option>
+                {% for group in groups%} 
+                <option value={{group.name}} {%if selected_group == group.name%} selected {%endif%}>{{group.name}}  
+            </option>
+            {% endfor %}
+        </select>
+        <button type = 'submit'>Search</button><br>
+        <button type = 'submit' formaction = "{% url 'paperpdf' %}">Generate PDF  </button>
+
+    </form>
+
+        <script> 
+
+            function disableGroup(university)
+            {
+                if (university.value == ''){
+                    document.getElementById('group').disabled = false
+                }
+                else{
+                    document.getElementById('group').disabled = true
+                }
+            };
+
+            function disableUniversity(group)
+            {
+                if (group.value == ''){
+                    document.getElementById('university').disabled = false
+                }
+                else{
+                    document.getElementById('university').disabled = true
+                }
+            };
+        </script>
+      
+      
+        
+    
+        <p>Date Range:
+            {{startdate}} - {{enddate}}
+        </p>
+        
+        {% if selected_group == '' and selected_university == '' %}
+        <p>
+            Total number of users:
+            {{total_number_of_users}}
+        </p>
+
+        <p>
+            Total number of universities: {{total_number_of_universities|linebreaksbr}}  
+        </p>
+
+        <p>
+            Total number of groups: {{total_number_of_groups|linebreaksbr}}  
+        </p>    
+            <p>
+            Total number of publications: {{total_number_of_publications|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of users per university: {{each_university_users_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of publications per university: {{each_university_publications_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of masters students per university: {{each_university_masters_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of phd students per university: {{each_university_phd_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of researchers per university: {{each_university_researchers_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of graduates per university: {{each_university_graduates_dict|linebreaksbr}} 
+        </p>
+        {%elif select_group != '' and selected_university == ''%}
+        <p>
+            Total number of users in group: {{total_number_of_users_in_group|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of publications in group: {{group_publications_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of masters students in group: {{group_masters_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of phd students in group: {{group_phd_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of reseachers in group: {{group_researchers_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of graduates in group: {{group_graduates_dict|linebreaksbr}} 
+        </p>
+
+        {% else%}
+        <p>
+            Total number of users in university: {{total_number_of_users_in_uni|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of groups in university: {{total_number_of_groups|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of publications in university: {{total_number_of_publications|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of users per group: {{each_group_users_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of publications per group: {{each_group_publications_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of masters students per group: {{each_group_masters_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of phd students per group: {{each_group_phd_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of reseachers per group: {{each_group_researchers_dict|linebreaksbr}} 
+        </p>
+        <p>
+            Total number of graduates per group: {{each_group_graduates_dict|linebreaksbr}} 
+        </p>
+        {%endif%}
+        
+    </center>
+</body>
+<html>
+
