@@ -15,10 +15,10 @@
             {% csrf_token %}
            
             <label for="startdate"><b>Startdate</b></label>
-            <input type="date"  name = 'startdate'  {% if selected_startdate == ''%} value = '' {%else%} value = '{{selected_startdate}}'{% endif%}/>
+            <input type="date"  name = 'startdate'  {% if startdate == ''%} value = '' {%else%} value = '{{startdate}}'{% endif%}/>
      
             <label for="enddate"><b>enddate</b></label>
-            <input type="date"  name = 'enddate'  {% if selected_endtdate == ''%} value = '' {%else%} value = '{{selected_enddate}}'{% endif%}/>
+            <input type="date"  name = 'enddate'  {% if endtdate == ''%} value = '' {%else%} value = '{{enddate}}'{% endif%}/>
 
             <label for="university"><b>university</b></label>
             <select id="university" name="university" onchange = 'disableGroup(this)'>

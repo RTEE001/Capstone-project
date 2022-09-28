@@ -1,3 +1,11 @@
+'''
+Python functions that takes http requests and returns http response, like HTML documents. 
+A web page that uses Django is full of views with different tasks and missions
+These functions hold the logic that is required to return information as a response in whatever form to the user
+'''
+
+import smtplib
+from email.mime.text import MIMEText
 from django.shortcuts import render, redirect
 from .models import Contact, Paper, Role, User, Group, University, StudentRole, PaperType
 from django.utils.text import slugify
@@ -19,13 +27,32 @@ from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from datetime import date
+import os
+from dotenv import load_dotenv
+#Dashboard
 
 '''
-Python functions that takes http requests and returns http response, like HTML documents. 
-A web page that uses Django is full of views with different tasks and missions
-These functions hold the logic that is required to return information as a response in whatever form to the user
+This function sends an email to a user whenever a user's account is deactivated
 '''
-#Dashboard
+def email_notif_deactivate(email_address):
+    load_dotenv()
+    SMTP_SERVER = os.getenv("SMTP_SERVER")
+    SMTP_PORT = os.getenv("SMTP_PORT")
+    SENDER_EMAIL_ADDRESS = os.getenv("SMTP_LOGIN")
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD") 
+
+    body = f"Your account with CAIR has been deactivated."
+    msg = MIMEText(body)
+    msg["Subject"] = 'Account activation'
+    msg["From"] = SENDER_EMAIL_ADDRESS
+    msg["To"] = email_address
+
+    smtp = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+    smtp.starttls()
+    smtp.login(SENDER_EMAIL_ADDRESS, SMTP_PASSWORD)
+    smtp.sendmail(SENDER_EMAIL_ADDRESS,email_address, msg.as_string())
+    smtp.quit()
+
 '''
 This fuction changes the status of the user account active to inactive
 '''
@@ -34,10 +61,35 @@ def deactivate_account(request):
     user = User.objects.get(id=user_id)
     user.is_active=False
     user.save()
-
+    email = user.email
+    email_notif_deactivate(email)
     return redirect('listusers')
 
 #Dashboard
+
+
+'''
+This function sends an email to a user whenever a user's account is activated
+'''
+def email_notif_activate(email_address):
+    load_dotenv()
+    SMTP_SERVER = os.getenv("SMTP_SERVER")
+    SMTP_PORT = os.getenv("SMTP_PORT")
+    SENDER_EMAIL_ADDRESS = os.getenv("SMTP_LOGIN")
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD") 
+
+    body = f"Your account with CAIR has been activated."
+    msg = MIMEText(body)
+    msg["Subject"] = 'Account activation'
+    msg["From"] = SENDER_EMAIL_ADDRESS
+    msg["To"] = email_address
+
+    smtp = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+    smtp.starttls()
+    smtp.login(SENDER_EMAIL_ADDRESS, SMTP_PASSWORD)
+    smtp.sendmail(SENDER_EMAIL_ADDRESS,email_address, msg.as_string())
+    smtp.quit()
+
 '''
 This fuction changes the status of the user account from inactive to active 
 '''
@@ -46,6 +98,8 @@ def activate_account(request):
     user = User.objects.get(id=user_id)
     user.is_active=True
     user.save()
+    email = user.email 
+    email_notif_activate(email)
     return redirect('listusers')
 
 #Dashboard
@@ -193,7 +247,6 @@ def passwordChange(request):
     user_id=""
     if 'key' in request.GET:
         user_id = request.GET['key']
-    print('this is'+request.method )
     context={
         'users': user_id
     }
@@ -427,21 +480,23 @@ def create_stuUser(request):
             first_name=request.POST['First']
             last_name=request.POST['Last']
             username=request.POST['username']
-            # student_role=request.POST['StudentRole']
             email=request.POST['email']
             password=request.POST['psw']
             password = make_password(password)
             if getRole(request)=='Researcher' or getRole(request)=='GroupAdmin':
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), university=University.objects.get(name__exact=request.user.university), group=Group.objects.get(name__exact=request.user.grp), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), university=University.objects.get(name__exact=request.user.university), group=Group.objects.get(name__exact=request.user.grp), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))
+                user.save()
+                email_notif(email)
             elif getRole(request)=='UniAdmin':
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))      
+                user.save()
+                email_notif(email)
             else:
                 
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'),  group=Group.objects.get(name__exact=request.POST['GroupCat']),university=University.objects.get(name__exact=Group.objects.get(name__exact=request.POST['GroupCat']).university), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))
-                # 
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'),  group=Group.objects.get(name__exact=request.POST['GroupCat']),university=University.objects.get(name__exact=Group.objects.get(name__exact=request.POST['GroupCat']).university), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))
+                user.save()
+                email_notif(email)
+                
     return redirect('listusers')
 
 def create_grpAdmin(request):
@@ -456,12 +511,14 @@ def create_grpAdmin(request):
             password = make_password(password)
             
             if getRole(request)=='UniAdmin':
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupAdmin'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupAdmin'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']))
+                user.save()
+                email_notif(email)
             else:
                 
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupAdmin'), university=University.objects.get(name__exact=Group.objects.get(name__exact=request.POST['GroupCat']).university), group=Group.objects.get(name__exact=request.POST['GroupCat']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupAdmin'), university=University.objects.get(name__exact=Group.objects.get(name__exact=request.POST['GroupCat']).university), group=Group.objects.get(name__exact=request.POST['GroupCat']))
+                user.save()
+                email_notif(email)
     return redirect('listusers')
 
 def create_uniAdmin(request):
@@ -473,8 +530,9 @@ def create_uniAdmin(request):
                 email=request.POST['email']
                 password=request.POST['psw']
                 password = make_password(password)
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='UniAdmin'), university=University.objects.get(name__exact=request.POST['UniCat']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='UniAdmin'), university=University.objects.get(name__exact=request.POST['UniCat']))
+                user.save()
+                email_notif(email)
         return redirect('listusers')
     return redirect('dashboard')
 
@@ -487,8 +545,9 @@ def create_CAIRAdmin(request):
                 email=request.POST['email']
                 password=request.POST['psw']
                 password = make_password(password)
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='CAIRAdmin'))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='CAIRAdmin'))
+                user.save()
+                email_notif(email)
         return redirect('listusers')
     return redirect ('dashboard')
 
@@ -501,15 +560,16 @@ def create_Researcher(request):
             password=request.POST['psw']
             password = make_password(password)
             if getRole(request)=='GroupAdmin':
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.user.university), group=Group.objects.get(name__exact=request.user.group))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.user.university), group=Group.objects.get(name__exact=request.user.group))
+                user.save()
             elif getRole(request)=='UniAdmin':
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']))
+                user.save()
             else:
                 
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.POST['UniCat']), group=Group.objects.get(name__exact=request.POST['GroupCat']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.POST['UniCat']), group=Group.objects.get(name__exact=request.POST['GroupCat']))
+                user.save()
+                email_notif(email)
     return redirect('listusers')
     #dashboard
 '''This function saves universtity details in the database'''
@@ -719,6 +779,27 @@ def createStudent(request):
 This function creates a student and saves it to the database
 The student is registered to the database as they are saved
 '''
+
+def email_notif(email_address, username, password):
+    load_dotenv()
+    SMTP_SERVER = os.getenv("SMTP_SERVER")
+    SMTP_PORT = os.getenv("SMTP_PORT")
+    SENDER_EMAIL_ADDRESS = os.getenv("SMTP_LOGIN")
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD") 
+
+    body = f"Your account with CAIR has been activated. Your username is {username} and your password is {password}"
+    msg = MIMEText(body)
+    msg["Subject"] = 'Account activation'
+    msg["From"] = SENDER_EMAIL_ADDRESS
+    msg["To"] = email_address
+
+    smtp = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+    smtp.starttls()
+    smtp.login(SENDER_EMAIL_ADDRESS, SMTP_PASSWORD)
+    smtp.sendmail(SENDER_EMAIL_ADDRESS,email_address, msg.as_string())
+    smtp.quit()
+
+
 def create_studentUser(request):
     if getRole(request)=='student':
         return redirect('dashboard')
@@ -731,16 +812,20 @@ def create_studentUser(request):
             password=request.POST['psw']
             password = make_password(password)
             if getRole(request)=='Researcher' or getRole(request)=='GroupAdmin':
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), university=University.objects.get(name__exact=request.user.university), group=Group.objects.get(name__exact=request.user.grp), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), university=University.objects.get(name__exact=request.user.university), group=Group.objects.get(name__exact=request.user.grp), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))
+                user.save()
+                email_notif(email, username, request.POST['psw'] )
             elif getRole(request)=='UniAdmin':
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))
+                user.save()
+                email_notif(email, username, request.POST['psw'] )
             else:
                 
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'),  group=Group.objects.get(name__exact=request.POST['GroupCat']),university=University.objects.get(name__exact=Group.objects.get(name__exact=request.POST['GroupCat']).university), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))
-                # 
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='student'),  group=Group.objects.get(name__exact=request.POST['GroupCat']),university=University.objects.get(name__exact=Group.objects.get(name__exact=request.POST['GroupCat']).university), student_role=StudentRole.objects.get(name__exact=request.POST['studentRole']))      
+                user.save()
+                email_notif(email, username, request.POST['psw'] )
+                
+                
     return redirect('listusers')
 
 '''
@@ -764,15 +849,18 @@ def create_Researcher(request):
             password=request.POST['psw']
             password = make_password(password)
             if getRole(request)=='GroupAdmin':
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.user.university), group=Group.objects.get(name__exact=request.user.group))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.user.university), group=Group.objects.get(name__exact=request.user.group))
+                user.save()
+                email_notif(email, username, request.POST['psw'] )
             elif getRole(request)=='UniAdmin':
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']))
+                user.save()
+                email_notif(email, username, request.POST['psw'] )
             else:
                 
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.POST['UniCat']), group=Group.objects.get(name__exact=request.POST['GroupCat']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='Researcher'), university=University.objects.get(name__exact=request.POST['UniCat']), group=Group.objects.get(name__exact=request.POST['GroupCat']))
+                user.save()
+                email_notif(email, username, request.POST['psw'] )
     return redirect('listusers')
 
 
@@ -802,12 +890,14 @@ def create_groupAdmin(request):
             password = make_password(password)
             
             if getRole(request)=='UniAdmin':
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupAdmin'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupAdmin'), university=University.objects.get(name__exact=request.user.university.name), group=Group.objects.get(name__exact=request.POST['GroupCat']))
+                user.save()
+                email_notif(email, username, request.POST['psw'] )
             else:
                 
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupAdmin'), university=University.objects.get(name__exact=Group.objects.get(name__exact=request.POST['GroupCat']).university), group=Group.objects.get(name__exact=request.POST['GroupCat']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='GroupAdmin'), university=University.objects.get(name__exact=Group.objects.get(name__exact=request.POST['GroupCat']).university), group=Group.objects.get(name__exact=request.POST['GroupCat']))
+                user.save()
+                email_notif(email, username, request.POST['psw'] )
     return redirect('listusers')
 
 
@@ -834,8 +924,9 @@ def create_uniAdmin(request):
                 email=request.POST['email']
                 password=request.POST['psw']
                 password = make_password(password)
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='UniAdmin'), university=University.objects.get(name__exact=request.POST['UniCat']))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='UniAdmin'), university=University.objects.get(name__exact=request.POST['UniCat']))
+                user.save()
+                email_notif(email, username, request.POST['psw'] )
         return redirect('listusers')
     return redirect('dashboard')
 
@@ -852,8 +943,9 @@ def create_CAIRAdmin(request):
                 email=request.POST['email']
                 password=request.POST['psw']
                 password = make_password(password)
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='CAIRAdmin'))
-                a.save()
+                user = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, role=Role.objects.get(RoleType__exact='CAIRAdmin'))
+                user.save()
+                email_notif(email, username, request.POST['psw'] )
         return redirect('listusers')
     return redirect ('dashboard')
 
@@ -908,8 +1000,6 @@ def reports_context(request):
     enddate = str(date.today())  
     group = ''
     university = ''
-
-
     context = {
         
         'startdate': startdate,
