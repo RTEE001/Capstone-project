@@ -1,3 +1,11 @@
+# About the project:
+
+This is a web application, built in Python using the Django. The goal was to build a web application that allows researchers from numerous institutions to upload their research findings for users to view and download. 
+
+# Features
+- Authentication and authorization
+- Uploading, deleting and updating of research papers by authorized users
+- Report generation on whole instititution or sub-branches over periods of time 
 
 # Roles in accessing the site:
 
